@@ -1,0 +1,17 @@
+AllCops:
+  TargetRubyVersion: 2.4
+
+Style/ExtraSpacing:
+  Enabled: true
+  AllowForAlignment: true
+
+Style/HashSyntax:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: true
+  Max: 100
+
