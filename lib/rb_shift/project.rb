@@ -18,57 +18,79 @@ module RbShift
       Project.new(name, client)
     end
 
-    def pods
-      @_pods ||= init_objects(Pod)
+    def pods(update = false)
+      @_pods = init_objects(Pod) if update || @_pods.nil?
+      @_pods
     end
 
-    def deployment_configs
-      @_deployment_configs ||= init_objects(DeploymentConfig)
+    def deployment_configs(update = false)
+      @_deployment_configs = init_objects(DeploymentConfig) if update || @_deployment_configs.nil?
+      @_deployment_configs
     end
 
-    def services
-      @_services ||= init_objects(Service)
+    def services(update = false)
+      @_services = init_objects(Service) if update || @_services.nil?
+      @_services
     end
 
-    def secrets
-      @_secrets ||= init_objects(Secret)
+    def secrets(update = false)
+      @_secrets = init_objects(Secret) if update || @_services.nil?
+      @_secrets
     end
 
-    def config_maps
-      @_config_maps ||= init_objects(ConfigMap)
+    def config_maps(update = false)
+      @_config_maps = init_objects(ConfigMap) if update || @_services.nil?
+      @_config_maps
     end
 
-    def templates
-      @_templates ||= init_objects(Template)
+    def templates(update = false)
+      @_templates = init_objects(Template) if update || @_templates.nil?
+      @_templates
     end
 
     def create_secret(name, kind, **opts)
-      `oc secrets #{kind} #{name} #{unfold_params(opts)}`
-      secrets << @client.get('secrets', :name => name, :namespace => @name) if @_secrets
+      execute "create secret #{kind} #{name}", **opts
+      secrets << @client.get('secrets', name: name, namespace: @name) if @_secrets
     end
 
     def create_template(file)
-      `oc create -f #{file}`
-      templates << @client.get('templates', :name => name, :namespace => @name) if @_templates
+      execute "create -f \"#{file}\""
+      templates << @client.get('templates', name: name, namespace: @name) if @_templates
     end
 
     def create_config_map(name, source, path, **opts)
-      `oc create configmap #{name} --#{source}=#{path} #{unfold_params(opts)}`
-      config_maps << @client.get('configmaps', :name => name, :namespace => @name) if @_config_maps
+      execute "create configmap #{name}", source.to_sym => path, **opts
+      config_maps << @client.get('configmaps', name: name, namespace: @name) if @_config_maps
     end
 
     def create_service(name, kind, **opts)
-      `oc create service #{kind} #{name} #{unfold_params(opts)}`
-      services << @client.get('services', :name => name, :namespace => @name) if @_services
+      execute "create service #{kind} #{name}", **opts
+      services << @client.get('services', name: name, namespace: @name) if @_services
+    end
+
+    def delete
+      execute "delete project #{@name}"
+    end
+
+    def wait_for_deployments(timeout = 30)
+      wait = true
+      while wait
+        sleep timeout
+        wait = !deployment_configs(true).select(&:running?).empty?
+      end
     end
 
     # Creates new Openshift application
     # Params:
     # +params+ - hash of key-value pairs to set/override a parameter value in the template
     # +args+ - any desired custom OC command options
-    def new_app(source, path, params = {}, **opts)
-      `oc new-app --#{source}=#{path} #{unfold_params(opts)} #{unfold_params(params, 'param')}`
+    def new_app(source, path, **opts)
+      execute 'new-app ', source.to_sym => path, **opts
       invalidate
+    end
+
+    def execute(command, **opts)
+      @client.execute command, namespace: @name, **opts
     end
 
     private
@@ -82,10 +104,8 @@ module RbShift
 
     def initialize(name, client)
       @client = client
-      @obj    = @client.get('namespaces', :name => name)
+      @obj    = @client.get('namespaces', name: name)
       @name   = name
-      `oc login #{client.url} --token=#{client.token}`
-      `oc project #{name}`
     end
   end
 end

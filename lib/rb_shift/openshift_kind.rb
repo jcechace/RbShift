@@ -30,11 +30,15 @@ module RbShift
         patch = @obj.to_json
       end
 
-      `oc patch #{self.class.class_name} #{@name} -p '#{patch}'`
+      @parent.execute "patch #{self.class.class_name} #{@name} -p '#{patch}"
+    end
+
+    def execute(command, params = {}, **opts)
+      @parent.execute(command, params, opts) if @parent.respond_to? :execute
     end
 
     def delete
-      `oc delete #{self.class.class_name} #{@name}`
+      @parent.execute "delete #{self.class.class_name} #{@name}"
       @parent.invalidate if @parent.respond_to? :invalidate
     end
 

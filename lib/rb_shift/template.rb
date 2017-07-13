@@ -11,7 +11,7 @@ module RbShift
     # +params+ - hash of key-value pairs to set/override a parameter value in the template
     # +args+ - any desired custom OC command options
     def process(params = {}, **opts)
-      `oc process #{name} #{unfold_params(opts)} #{unfold_params(params, 'value')}`
+      @parent.execute "process #{name}", value: params, **opts
       @parent.invalidate
     end
   end

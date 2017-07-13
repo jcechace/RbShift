@@ -22,13 +22,13 @@ module RbShift
       @openshift  = RestClient::Resource.new "#{url}/oapi/v1",
                                              verify_ssl: OpenSSL::SSL::VERIFY_NONE,
                                              headers:    { Authorization: "Bearer #{bearer_token}" }
-      @_projects  = Project.list
     end
 
     # rubocop:disable Metrics/AbcSize
     def get(resource, **opts)
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
+
       request << resource.to_s
       request << opts[:name].to_s if opts[:name]
       client = client resource
@@ -41,11 +41,31 @@ module RbShift
     end
 
     def create_project(name, **opts)
-      `oc new-project #{name}`
+      `oc new-project #{name} #{unfold_opts(opts)}`
+      @_projects = nil
+    end
+
+    def projects(update = false)
+      @_projects = load_projects if update || !@_projects
+      @_projects
+    end
+
+    def execute(command, **opts)
+      `oc --server="#{@url}" --token="#{@token}" #{command}  #{unfold_opts opts}`
+    end
+
+    def wait_project_deletion(project_name, timeout = 1)
+      sleep timeout until projects(true).detect { |v| v.name == project_name }.nil?
+    end
+
+    def self.get_token(ose_server, username, password)
+      `oc login #{ose_server} --username=#{username} --password=#{password} --insecure-skip-tls-verify`
+      `oc whoami --show-token`.strip
     end
 
     def self.list(service)
-      project.client
+      Project
+        .client
         .get('routes', namespace: project.name)
         .select { |item| item[:spec][:to][:name] == service.name }
         .map { |item| kind.new(parent, item) }
@@ -66,10 +86,14 @@ module RbShift
       raise "Resource '#{resource}' not supported!"
     end
 
+    def load_projects
+      get('projects').map { |it| Project.new(it[:metadata][:name], self) }
+    end
+
     def load_entities(client)
       JSON
         .parse(client.get)['resources']
-        .select { |resource| !resource['name'].include?('/') }
+        .reject { |resource| resource['name'].include?('/') }
         .map { |resource| resource['name'] }
         .uniq
     end
@@ -80,6 +104,22 @@ module RbShift
 
     def os_entities
       @_os_entities ||= load_entities(@openshift)
+    end
+
+    private
+
+    def unfold_opts(opts)
+      opts.map do |k, v|
+        r = ''
+        r = v.map { |l| "--#{k}=#{l}" }.join(' ') if v.is_a? Array
+        r = v.map { |m, n| "--#{k}=\"#{m}=#{n}\"" }.join(' ') if v.is_a? Hash
+        r = "--#{k}=#{v}" unless (v.is_a? Hash) || (v.is_a? Array)
+        r
+      end.join(' ')
+    end
+
+    def unfold_params(params, prefix)
+      params.map { |k, v| "--#{prefix}=\"#{k}=#{v}\"" }.join(' ')
     end
   end
 end
