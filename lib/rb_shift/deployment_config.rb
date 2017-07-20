@@ -11,8 +11,11 @@ module RbShift
       @parent.execute "scale dc #{name}", replicas: replicas
     end
 
-    def start_deployment
+    def start_deployment(block = false, timeout = 10)
       @parent.execute "deploy #{name} --latest"
+      sleep timeout
+      deployments(true)
+      sleep timeout while running? && block
     end
 
     def deployments(update = false)
@@ -27,8 +30,9 @@ module RbShift
       @_deployments
     end
 
-    def running?
-      !deployments(true).select(&:running?).empty?
+    def running?(reload = false)
+      deployments(true) if reload
+      !deployments.select(&:running?).empty?
     end
   end
 end

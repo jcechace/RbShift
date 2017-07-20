@@ -23,6 +23,11 @@ module RbShift
       @obj.respond_to? symbol
     end
 
+    def reload
+      @obj = read_link @obj[:metadata][:selfLink]
+      invalidate
+    end
+
     def update(patch = nil)
       if patch
         parent.invalidate
@@ -56,10 +61,8 @@ module RbShift
       name.split('::').last.downcase
     end
 
-    protected
-
-    def unfold_params(params, prefix = nil)
-      params.map { |k, v| "--#{prefix + '=' if prefix}#{k}=#{v}" }.join(' ')
+    def read_link(link)
+      @parent.read_link link
     end
   end
 end

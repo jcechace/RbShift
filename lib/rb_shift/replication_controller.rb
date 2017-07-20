@@ -11,10 +11,12 @@ module RbShift
     end
 
     def running?
+      reload
       phase == 'Running'
     end
 
     def completed?
+      reload
       phase == 'Completed'
     end
   end

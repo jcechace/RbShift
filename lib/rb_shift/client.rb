@@ -32,17 +32,24 @@ module RbShift
       request << resource.to_s
       request << opts[:name].to_s if opts[:name]
       client = client resource
-      process_response JSON.parse(client[request].get, :symbolize_names => true)
+      process_response JSON.parse(client[request].get, symbolize_names: true)
+    end
+
+    def read_link(link)
+      v = RestClient.get "#{@url}#{link}", Authorization: "Bearer #{@token}"
+      process_response JSON.parse(v, symbolize_names: true)
     end
 
     def process_response(response)
       return response[:items] if response[:items]
-      return response[:metadata] if response[:metadata]
+      response
     end
 
     def create_project(name, **opts)
-      `oc new-project #{name} #{unfold_opts(opts)}`
-      @_projects = nil
+      execute "new-project #{name}", **opts
+      project = nil
+      project = projects(true).detect { |p| p.name == name } while project.nil?
+      project
     end
 
     def projects(update = false)

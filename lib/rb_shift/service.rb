@@ -7,18 +7,27 @@ require_relative 'route'
 module RbShift
   # Representation of OpenShift service
   class Service < OpenshiftKind
-    def routes
-      @_routes ||= get_routes
+    def routes(update = false)
+      @_routes = load_routes if update || @_routes.nil?
+      @_routes
     end
 
-    def create_route(name, termination, **opts)
-      @parent.execute "create route #{termination} #{name}", service: @name, **opts
+    def create_route(name, hostname, termination = 'edge', **opts)
+      unless termination.nil?
+        @parent.execute "create route #{termination} #{name}",
+                        hostname: hostname,
+                        service: @name,
+                        **opts
+      end
+      if termination.nil?
+        @parent.execute "expose service #{@name}", hostname: hostname, name: name, **opts
+      end
       routes << @parent.client.get('routes', name: name, namespace: @parent.name) if @_routes
     end
 
     private
 
-    def get_routes
+    def load_routes
       @parent
         .client
         .get('routes', namespace: @parent.name)

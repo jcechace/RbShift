@@ -68,15 +68,17 @@ module RbShift
       services << @client.get('services', name: name, namespace: @name) if @_services
     end
 
-    def delete
+    def delete(block = false, timeout = 1)
       execute "delete project #{@name}"
+      @client.wait_project_deletion(@name, timeout) if block
     end
 
-    def wait_for_deployments(timeout = 30)
+    def wait_for_deployments(timeout = 30, update = false)
+      deployment_configs true
       wait = true
       while wait
         sleep timeout
-        wait = !deployment_configs(true).select(&:running?).empty?
+        wait = !deployment_configs(update).select(&:running?).empty?
       end
     end
 
@@ -84,13 +86,18 @@ module RbShift
     # Params:
     # +params+ - hash of key-value pairs to set/override a parameter value in the template
     # +args+ - any desired custom OC command options
-    def new_app(source, path, **opts)
+    def new_app(source, path, block = false, timeout = 30, **opts)
       execute 'new-app ', source.to_sym => path, **opts
-      invalidate
+      wait_for_deployments timeout if block
+      invalidate unless block
     end
 
     def execute(command, **opts)
       @client.execute command, namespace: @name, **opts
+    end
+
+    def read_link(link)
+      @client.read_link link
     end
 
     private
