@@ -13,13 +13,12 @@ module RbShift
     end
 
     def create_route(name, hostname, termination = 'edge', **opts)
-      unless termination.nil?
+      if termination
         @parent.execute "create route #{termination} #{name}",
                         hostname: hostname,
                         service: @name,
                         **opts
-      end
-      if termination.nil?
+      else
         @parent.execute "expose service #{@name}", hostname: hostname, name: name, **opts
       end
       routes << @parent.client.get('routes', name: name, namespace: @parent.name) if @_routes
