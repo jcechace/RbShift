@@ -28,9 +28,8 @@ module RbShift
     def get(resource, **opts)
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
-
       request << resource.to_s
-      request << opts[:name].to_s if opts[:name]
+      request << "/#{opts[:name].to_s}" if opts[:name]
       client = client resource
       process_response JSON.parse(client[request].get, symbolize_names: true)
     end
@@ -48,7 +47,7 @@ module RbShift
     def create_project(name, **opts)
       execute "new-project #{name}", **opts
       project = nil
-      project = projects(true).detect { |p| p.name == name } while project.nil?
+      project = projects(true).find { |p| p.name == name } while project.nil?
       project
     end
 
@@ -62,7 +61,7 @@ module RbShift
     end
 
     def wait_project_deletion(project_name, timeout = 1)
-      sleep timeout until projects(true).detect { |v| v.name == project_name }.nil?
+      sleep timeout until projects(true).find { |v| v.name == project_name }.nil?
     end
 
     def self.get_token(ose_server, username, password)
@@ -123,10 +122,6 @@ module RbShift
         r = "--#{k}=#{v}" unless (v.is_a? Hash) || (v.is_a? Array)
         r
       end.join(' ')
-    end
-
-    def unfold_params(params, prefix)
-      params.map { |k, v| "--#{prefix}=\"#{k}=#{v}\"" }.join(' ')
     end
   end
 end
