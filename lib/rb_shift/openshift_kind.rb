@@ -38,7 +38,6 @@ module RbShift
       @parent.invalidate if @parent.respond_to? :invalidate
     end
 
-
     def invalidate
       instance_variables.select { |x| x.to_s.include?('@_') }.each do |x|
         instance_variable_set(x, nil)
@@ -58,6 +57,5 @@ module RbShift
     def unfold_params(params, prefix = nil)
       params.map { |k, v| "--#{prefix + '=' if prefix}#{k}=#{v}" }.join(' ')
     end
-
   end
 end

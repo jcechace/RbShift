@@ -1,8 +1,15 @@
+# coding: utf-8
+# frozen_string_literal: true
+
 require 'rest-client'
 require 'json'
 require_relative 'project'
 
+#
+# Ruby wrapper for oc tools
+#
 module RbShift
+  # Client starting point
   class Client
     attr_reader :token, :url
 
@@ -18,11 +25,12 @@ module RbShift
       @_projects  = Project.list
     end
 
+    # rubocop:disable Metrics/AbcSize
     def get(resource, **opts)
-      request = ''
+      request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
-      request << "#{resource}/"
-      request << "#{opts[:name]}" if opts[:name]
+      request << resource.to_s
+      request << opts[:name].to_s if opts[:name]
       client = client resource
       process_response JSON.parse(client[request].get, :symbolize_names => true)
     end
@@ -36,18 +44,18 @@ module RbShift
       `oc new-project #{name}`
     end
 
-    protected
-
-    def list(kind, parent)
-      get(kind.resource_name, namespace: @name)
-        .map { |item| resource_class.new(parent, item) }
-    end
-
     def self.list(service)
       project.client
         .get('routes', namespace: project.name)
         .select { |item| item[:spec][:to][:name] == service.name }
         .map { |item| kind.new(parent, item) }
+    end
+
+    protected
+
+    def list(kind, parent)
+      get(kind.resource_name, namespace: @name)
+        .map { |item| resource_class.new(parent, item) }
     end
 
     private
@@ -75,4 +83,3 @@ module RbShift
     end
   end
 end
-
