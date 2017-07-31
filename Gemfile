@@ -3,7 +3,6 @@
 
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in RbShift.gemspec
-gemspec
-
-gem 'rubocop', require: false
+gem 'bundler', '~> 1.14'
+gem 'dotenv', '~> 2.2'
+gem 'yard'

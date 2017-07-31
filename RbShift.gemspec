@@ -34,6 +34,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.14'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
+  spec.add_development_dependency 'minitest', '~> 5.10'
+  spec.add_development_dependency 'minitest-hooks', '~> 1.4'
+  spec.add_development_dependency 'minitest-matchers_vaccine', '~> 1.0'
 
   spec.add_runtime_dependency 'rest-client', '~> 2.0'
 end
