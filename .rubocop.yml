@@ -1,9 +1,11 @@
 AllCops:
   TargetRubyVersion: 2.4
+  DisplayCopNames: true
 
-Style/ExtraSpacing:
+Layout/ExtraSpacing:
   Enabled: true
   AllowForAlignment: true
+  ForceEqualSignAlignment: true
 
 Style/HashSyntax:
   Enabled: false
@@ -11,7 +13,18 @@ Style/HashSyntax:
 Style/GuardClause:
   Enabled: false
 
+Style/WordArray:
+  EnforcedStyle: brackets
+
+Style/SpaceAroundOperators:
+  AllowForAlignment: true
+
 Metrics/LineLength:
   Enabled: true
   Max: 100
 
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 20
