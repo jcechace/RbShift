@@ -13,8 +13,13 @@ module RbShift
   class Client
     attr_reader :token, :url
 
-    def initialize(url, bearer_token)
-      @token      = bearer_token
+    def initialize(url, bearer_token = nil, username = nil, password = nil)
+      if bearer_token.nil? && (username.nil? || password.nil?)
+        raise 'Token or username and password must be provided'
+      end
+
+      @token      = get_token(url, username, password) unless bearer_token
+      @token      = bearer_token if bearer_token
       @url        = url
       @kubernetes = RestClient::Resource.new "#{url}/api/v1",
                                              verify_ssl: OpenSSL::SSL::VERIFY_NONE,
@@ -29,7 +34,7 @@ module RbShift
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
       request << resource.to_s
-      request << "/#{opts[:name].to_s}" if opts[:name]
+      request << "/#{opts[:name]}" if opts[:name]
       client = client resource
       process_response JSON.parse(client[request].get, symbolize_names: true)
     end
@@ -64,6 +69,7 @@ module RbShift
       sleep timeout until projects(true).find { |v| v.name == project_name }.nil?
     end
 
+    # rubocop:disable Metrics/LineLength
     def self.get_token(ose_server, username, password)
       `oc login #{ose_server} --username=#{username} --password=#{password} --insecure-skip-tls-verify`
       `oc whoami --show-token`.strip
@@ -112,15 +118,16 @@ module RbShift
       @_os_entities ||= load_entities(@openshift)
     end
 
-    private
-
     def unfold_opts(opts)
       opts.map do |k, v|
-        r = ''
-        r = v.map { |l| "--#{k}=#{l}" }.join(' ') if v.is_a? Array
-        r = v.map { |m, n| "--#{k}=\"#{m}=#{n}\"" }.join(' ') if v.is_a? Hash
-        r = "--#{k}=#{v}" unless (v.is_a? Hash) || (v.is_a? Array)
-        r
+        case v
+        when Array
+          v.map { |l| "--#{k}=#{l}" }.join(' ')
+        when Hash
+          v.map { |m, n| "--#{k}=\"#{m}=#{n}\"" }.join(' ')
+        else
+          "--#{k}=#{v}"
+        end
       end.join(' ')
     end
   end
