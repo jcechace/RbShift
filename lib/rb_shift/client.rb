@@ -13,13 +13,14 @@ module RbShift
   class Client
     attr_reader :token, :url
 
+    class InvalidAuthorizationError < StandardError; end
+
     def initialize(url, bearer_token = nil, username = nil, password = nil)
       if bearer_token.nil? && (username.nil? || password.nil?)
-        raise 'Token or username and password must be provided'
+        raise InvalidAuthorizationError
       end
 
-      @token      = get_token(url, username, password) unless bearer_token
-      @token      = bearer_token if bearer_token
+      @token      = bearer_token || get_token(url, username, password)
       @url        = url
       @kubernetes = RestClient::Resource.new "#{url}/api/v1",
                                              verify_ssl: OpenSSL::SSL::VERIFY_NONE,
