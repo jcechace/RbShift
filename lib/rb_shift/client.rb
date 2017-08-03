@@ -30,7 +30,6 @@ module RbShift
                                              headers:    { Authorization: "Bearer #{bearer_token}" }
     end
 
-    # rubocop:disable Metrics/AbcSize
     def get(resource, **opts)
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
