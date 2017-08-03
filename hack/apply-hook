@@ -1,0 +1,5 @@
+#!/bin/sh
+
+SRC_DIR="$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd)"
+
+ln -s -f "${SRC_DIR}/../hooks/pre-commit" "${SRC_DIR}/../.git/hooks/pre-commit"

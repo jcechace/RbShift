@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Pre-commit hook to run Rubocop on staged files.
+# To apply this hook create symlink with target in .git/hooks/pre-commit or run bin/apply-hook
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# Get only the staged files
+FILES="$(git diff --cached --name-only --diff-filter=AMC | grep "\.rb$" | tr '\n' ' ')"
+
+echo -e "${GREEN}[Ruby Style][Info]: Checking Ruby Style${NC}"
+
+if [ -n "$FILES" ]; then
+	echo -e "${GREEN}[Ruby Style][Info]: ${FILES}${NC}"
+
+	bundle exec rubocop ${FILES}
+	
+	if [ $? -ne 0 ]; then
+	  echo -e "${RED}[Ruby Style][Error]: Fix the issues and commit again${NC}"
+	  exit 1
+	fi
+else
+	echo -e "${GREEN}[Ruby Style][Info]: No files to check${NC}"
+fi
