@@ -3,6 +3,5 @@
 
 source 'https://rubygems.org'
 
-gem 'bundler', '~> 1.14'
-gem 'dotenv', '~> 2.2'
+gem 'rubocop', '~> 0.49', require: false
 gem 'yard'
