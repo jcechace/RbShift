@@ -8,6 +8,7 @@ require_relative 'pod'
 require_relative 'secret'
 require_relative 'service'
 require_relative 'template'
+require_relative 'role_binding'
 
 module RbShift
   # Representation of OpenShift project
@@ -48,9 +49,24 @@ module RbShift
       @_templates
     end
 
+    def role_bindings(update = false)
+      @_role_bindings = init_objects(RoleBinding) if update || @_role_bindings.nil?
+      @_role_bindings
+    end
+
     def create_secret(name, kind, **opts)
       execute "create secret #{kind} #{name}", **opts
       secrets << @client.get('secrets', name: name, namespace: @name) if @_secrets
+    end
+
+    def add_role_to_user(role, username)
+      execute "policy add-role-to-user #{role} #{username}"
+      role_bindings true
+    end
+
+    def add_role_to_group(role, groupname)
+      execute "policy add-role-to-group #{role} #{groupname}"
+      role_bindings true
     end
 
     def create_template(file)
