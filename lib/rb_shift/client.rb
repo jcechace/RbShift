@@ -3,6 +3,7 @@
 
 require 'rest-client'
 require 'json'
+require 'open3'
 require_relative 'project'
 
 #
@@ -14,20 +15,21 @@ module RbShift
     attr_reader :token, :url
 
     class InvalidAuthorizationError < StandardError; end
+    class InvalidCommandError < StandardError; end
 
-    def initialize(url, bearer_token = nil, username = nil, password = nil)
+    def initialize(url, bearer_token: nil, username: nil, password: nil)
       if bearer_token.nil? && (username.nil? || password.nil?)
         raise InvalidAuthorizationError
       end
 
-      @token      = bearer_token || get_token(url, username, password)
+      @token      = bearer_token || Client.get_token(url, username, password)
       @url        = url
       @kubernetes = RestClient::Resource.new "#{url}/api/v1",
                                              verify_ssl: OpenSSL::SSL::VERIFY_NONE,
-                                             headers:    { Authorization: "Bearer #{bearer_token}" }
+                                             headers:    { Authorization: "Bearer #{@token}" }
       @openshift  = RestClient::Resource.new "#{url}/oapi/v1",
                                              verify_ssl: OpenSSL::SSL::VERIFY_NONE,
-                                             headers:    { Authorization: "Bearer #{bearer_token}" }
+                                             headers:    { Authorization: "Bearer #{@token}" }
     end
 
     def get(resource, **opts)
@@ -52,7 +54,7 @@ module RbShift
     def create_project(name, **opts)
       execute "new-project #{name}", **opts
       project = nil
-      project = projects(true).find { |p| p.name == name } while project.nil?
+      project = projects(true).find { |p| p.name == name } until project
       project
     end
 
@@ -62,25 +64,22 @@ module RbShift
     end
 
     def execute(command, **opts)
-      `oc --server="#{@url}" --token="#{@token}" #{command}  #{unfold_opts opts}`
+      command = "oc --server=\"#{@url}\" --token=\"#{@token}\" #{command}  #{unfold_opts opts}"
+      Open3.popen3 command do |_, _, stderr, wait_thrd|
+        err_code = wait_thrd.value
+        raise InvalidCommandError unless stderr.gets.nil? && err_code.success?
+      end
     end
 
     def wait_project_deletion(project_name, timeout = 1)
-      sleep timeout until projects(true).find { |v| v.name == project_name }.nil?
+      sleep timeout while get('projects').find { |v| v[:metadata][:name] == project_name }
+      projects true
     end
 
     # rubocop:disable Metrics/LineLength
     def self.get_token(ose_server, username, password)
       `oc login #{ose_server} --username=#{username} --password=#{password} --insecure-skip-tls-verify`
       `oc whoami --show-token`.strip
-    end
-
-    def self.list(service)
-      Project
-        .client
-        .get('routes', namespace: project.name)
-        .select { |item| item[:spec][:to][:name] == service.name }
-        .map { |item| kind.new(parent, item) }
     end
 
     protected

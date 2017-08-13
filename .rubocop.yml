@@ -7,6 +7,9 @@ Layout/ExtraSpacing:
   AllowForAlignment: true
   ForceEqualSignAlignment: true
 
+Layout/SpaceAroundOperators:
+  AllowForAlignment: true
+
 Style/HashSyntax:
   Enabled: false
 
@@ -16,12 +19,15 @@ Style/GuardClause:
 Style/WordArray:
   EnforcedStyle: brackets
 
-Style/SpaceAroundOperators:
-  AllowForAlignment: true
-
 Metrics/LineLength:
   Enabled: true
   Max: 100
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/ModuleLength:
+  Max: 150
 
 Metrics/BlockLength:
   Enabled: false
