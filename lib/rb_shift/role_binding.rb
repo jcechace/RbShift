@@ -2,5 +2,7 @@
 
 require_relative 'openshift_kind'
 
-class RoleBinding < OpenshiftKind
+module RbShift
+  class RoleBinding < OpenshiftKind
+  end
 end
