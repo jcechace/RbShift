@@ -38,8 +38,8 @@ module RbShift
       @parent.execute "patch #{self.class.class_name} #{@name} -p '#{patch}"
     end
 
-    def execute(command, params = {}, **opts)
-      @parent.execute(command, params, opts) if @parent.respond_to? :execute
+    def execute(command, **opts)
+      @parent.execute(command, **opts) if @parent.respond_to? :execute
     end
 
     def delete
