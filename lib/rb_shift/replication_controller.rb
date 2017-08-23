@@ -7,7 +7,7 @@ module RbShift
   # Representation of replication controller
   class ReplicationController < OpenshiftKind
     def phase
-      @obj[:metadata][:annotations]['openshift.io/deployment.phase'.to_sym]
+      obj[:metadata][:annotations]['openshift.io/deployment.phase'.to_sym]
     end
 
     def running?

@@ -15,16 +15,16 @@ module RbShift
     end
 
     def method_missing(symbol, *args)
-      return @obj.send(symbol, *args) if @obj.respond_to? symbol
+      return obj.send(symbol, *args) if obj.respond_to? symbol
       super
     end
 
     def respond_to_missing?(symbol)
-      @obj.respond_to? symbol
+      obj.respond_to? symbol
     end
 
     def reload
-      @obj = read_link @obj[:metadata][:selfLink]
+      self.obj = read_link obj[:metadata][:selfLink]
       invalidate
     end
 
@@ -32,7 +32,7 @@ module RbShift
       if patch
         parent.invalidate
       else
-        patch = @obj.to_json
+        patch = obj.to_json
       end
 
       @parent.execute "patch #{self.class.class_name} #{@name} -p '#{patch}"
@@ -64,5 +64,9 @@ module RbShift
     def read_link(link)
       @parent.read_link link
     end
+
+    protected
+
+    attr_accessor :obj
   end
 end

@@ -116,6 +116,14 @@ module RbShift
       @client.read_link link
     end
 
+    protected
+
+    attr_writer :obj
+
+    def obj
+      @obj ||= @client.get('namespaces', name: @name)
+    end
+
     private
 
     def init_objects(klass)
@@ -127,7 +135,6 @@ module RbShift
 
     def initialize(name, client)
       @client = client
-      @obj    = @client.get('namespaces', name: name)
       @name   = name
     end
   end
