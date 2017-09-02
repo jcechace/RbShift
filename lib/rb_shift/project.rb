@@ -35,12 +35,12 @@ module RbShift
     end
 
     def secrets(update = false)
-      @_secrets = init_objects(Secret) if update || @_services.nil?
+      @_secrets = init_objects(Secret) if update || @_secrets.nil?
       @_secrets
     end
 
     def config_maps(update = false)
-      @_config_maps = init_objects(ConfigMap) if update || @_services.nil?
+      @_config_maps = init_objects(ConfigMap) if update || @_config_maps.nil?
       @_config_maps
     end
 
