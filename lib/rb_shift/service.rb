@@ -21,7 +21,7 @@ module RbShift
       else
         @parent.execute "expose service #{@name}", hostname: hostname, name: name, **opts
       end
-      routes << @parent.client.get('routes', name: name, namespace: @parent.name) if @_routes
+      routes true if @_routes
     end
 
     private

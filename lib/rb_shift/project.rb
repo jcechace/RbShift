@@ -56,32 +56,32 @@ module RbShift
 
     def create_secret(name, kind, **opts)
       execute "create secret #{kind} #{name}", **opts
-      secrets << @client.get('secrets', name: name, namespace: @name) if @_secrets
+      secrets true if @_secrets
     end
 
     def add_role_to_user(role, username)
       execute "policy add-role-to-user #{role} #{username}"
-      role_bindings true
+      role_bindings true if @_role_bindings
     end
 
     def add_role_to_group(role, groupname)
       execute "policy add-role-to-group #{role} #{groupname}"
-      role_bindings true
+      role_bindings true if @_role_bindings
     end
 
     def create_template(file)
       execute "create -f \"#{file}\""
-      templates << @client.get('templates', name: name, namespace: @name) if @_templates
+      templates true if @_templates
     end
 
     def create_config_map(name, source, path, **opts)
       execute "create configmap #{name}", source.to_sym => path, **opts
-      config_maps << @client.get('configmaps', name: name, namespace: @name) if @_config_maps
+      config_maps true if @_config_maps
     end
 
     def create_service(name, kind, **opts)
       execute "create service #{kind} #{name}", **opts
-      services << @client.get('services', name: name, namespace: @name) if @_services
+      services true if @_services
     end
 
     def delete(block = false, timeout = 1)
