@@ -32,6 +32,14 @@ module RbShift
                                              headers:    { Authorization: "Bearer #{@token}" }
     end
 
+    # @api public
+    # Retrieves resources from OpenShift or kubernetes API
+    #
+    # @param [Class] resource Resource class
+    # @param [List] opts Options
+    # @option [String] namespace
+    # @option [String] name Name of the resource
+    # @return [List] List of resources
     def get(resource, **opts)
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
@@ -98,7 +106,11 @@ module RbShift
     end
 
     def load_projects
-      get('projects').map { |it| Project.new(it[:metadata][:name], self) }
+      items = get('projects')
+      items.each_with_object({}) do |item, hash|
+        resource            = Project.new(item[:metadata][:name], self)
+        hash[resource.name] = resource
+      end
     end
 
     def load_entities(client)

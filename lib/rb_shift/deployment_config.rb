@@ -18,14 +18,18 @@ module RbShift
       sleep timeout while running? && block
     end
 
+    # rubocop:disable Layout/ExtraSpacing
     def deployments(update = false)
       dc_label = 'openshift.io/deployment-config.name'.to_sym
       if update || @_deployments.nil?
-        @_deployments = @parent
-                        .client
-                        .get('replicationcontrollers', namespace: @parent.name)
-                        .select { |item| item[:metadata][:annotations][dc_label] == @name }
-                        .map { |item| ReplicationController.new(self, item) }
+        items = @parent.client
+                       .get('replicationcontrollers', namespace: @parent.name)
+                       .select { |item| item[:metadata][:annotations][dc_label] == @name }
+
+        @_deployments = items.each_with_object({}) do |item, hash|
+          resource            = ReplicationController.new(self, item)
+          hash[resource.name] = resource
+        end
       end
       @_deployments
     end

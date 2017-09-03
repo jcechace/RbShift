@@ -126,11 +126,16 @@ module RbShift
 
     private
 
+    # Initialize object representations of OpenShift/Kubernetes resources
+    #
+    # @return [Hash] Name-Object hash of resource object
     def init_objects(klass)
-      resource_class = Object.const_get(klass.name)
-      @client
-        .get(resource_class.resource_name, namespace: @name)
-        .map { |item| resource_class.new(self, item) }
+      rclass = Object.const_get(klass.name)
+      items  = @client.get(rclass.resource_name, namespace: @name)
+      items.each_with_object({}) do |item, hash|
+        resource            = rclass.new(self, item)
+        hash[resource.name] = resource
+      end
     end
 
     def initialize(name, client)

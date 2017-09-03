@@ -27,11 +27,14 @@ module RbShift
     private
 
     def load_routes
-      @parent
-        .client
-        .get('routes', namespace: @parent.name)
-        .select { |item| item[:spec][:to][:name] == @name }
-        .map { |item| Route.new(self, item) }
+      items = @parent.client
+                     .get('routes', namespace: @parent.name)
+                     .select { |item| item[:spec][:to][:name] == @name }
+
+      items.each_with_object({}) do |item, hash|
+        resource            = Route.new(self, item)
+        hash[resource.name] = resource
+      end
     end
   end
 end
