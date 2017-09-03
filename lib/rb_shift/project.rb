@@ -54,6 +54,11 @@ module RbShift
       @_role_bindings
     end
 
+    def routes(update = false)
+      @_routes = init_objects(Route) if update || @_routes.nil?
+      @_routes
+    end
+
     def create_secret(name, kind, **opts)
       execute "create secret #{kind} #{name}", **opts
       secrets true if @_secrets
