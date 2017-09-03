@@ -5,6 +5,7 @@ require 'rest-client'
 require 'json'
 require 'open3'
 require_relative 'project'
+require_relative 'logging/logging_support'
 
 #
 # Ruby wrapper for oc tools
@@ -12,6 +13,8 @@ require_relative 'project'
 module RbShift
   # Client starting point
   class Client
+    include Logging::LoggingSupport
+
     attr_reader :token, :url
 
     class InvalidAuthorizationError < StandardError; end
@@ -71,11 +74,16 @@ module RbShift
       @_projects
     end
 
+    # rubocop:disable Metrics/AbcSize
     def execute(command, **opts)
-      command = "oc --server=\"#{@url}\" --token=\"#{@token}\" #{command}  #{unfold_opts opts}"
-      Open3.popen3 command do |_, _, stderr, wait_thrd|
-        err_code = wait_thrd.value
-        raise InvalidCommandError unless stderr.gets.nil? && err_code.success?
+      oc_cmd = oc_command(command, **opts)
+      log.debug oc_cmd
+      _, stderr, stat = Open3.capture3(cmd)
+      unless stderr.empty? && stat.success?
+        log.error oc_command(command, exclude_token: true, **opts)
+        log.error "Command failed with status #{stat.exitstatus} -->"
+        log.error stderr
+        raise InvalidCommandError
       end
     end
 
@@ -98,6 +106,11 @@ module RbShift
     end
 
     private
+
+    def oc_command(command, exclude_token: false, **opts)
+      token = exclude_token ? '***' : @token
+      "oc --server=\"#{@url}\" --token=\"#{token}\" #{command} #{unfold_opts opts}"
+    end
 
     def client(resource)
       return @kubernetes if kube_entities.include?(resource)
