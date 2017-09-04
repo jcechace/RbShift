@@ -22,8 +22,8 @@ All resources in openshift are created and managed in projects.
 # Get list of projects
 projects = cli.projects
 
-# searching specific project
-my_proj = projects.find { |i| i.name == 'MyAwesomeProject'}
+# selecting specific project
+my_proj = projects['MyAwesomeProject']
 
 # Delete project without waiting
 my_proj.delete
@@ -69,7 +69,7 @@ my_proj.wait_for_deployments
 ## Redeploy component
 ```ruby
 # Find DeploymentConfig to redeploy
-dc = my_proj.deployments.find { |d| d.name == 'DCName' }
+dc = my_proj.deployments['DCName']
 
 # Start deployment asynchronously
 dc.start_deployment
@@ -81,7 +81,7 @@ dc.start_deployment true, 30
 ## Creating route
 ```ruby
 # Find service to expose
-service = my_proj.services.find { |svc| svc.name == 'ServiceName' }
+service = my_proj.services['ServiceName']
 
 # Create edge terminated https route (encrypted by default router's certificate)
 service.create_route 'Route1', 'route1.example.com'
