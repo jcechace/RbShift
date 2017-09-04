@@ -36,7 +36,7 @@ module RbShift
 
     def running?(reload = false)
       deployments(true) if reload
-      !deployments.select(&:running?).empty?
+      !deployments.values.select(&:running?).empty?
     end
   end
 end
