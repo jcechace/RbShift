@@ -78,7 +78,7 @@ module RbShift
     def execute(command, **opts)
       oc_cmd = oc_command(command, **opts)
       log.debug oc_cmd
-      _, stderr, stat = Open3.capture3(cmd)
+      _, stderr, stat = Open3.capture3(oc_cmd)
       unless stderr.empty? && stat.success?
         log.error oc_command(command, exclude_token: true, **opts)
         log.error "Command failed with status #{stat.exitstatus} -->"
