@@ -12,7 +12,7 @@ module RbShift
     end
 
     def start_deployment(block = false, timeout = 10)
-      @parent.execute "deploy #{name} --latest"
+      @parent.execute "rollout latest #{name}"
       sleep timeout
       deployments(true)
       sleep timeout while running? && block
