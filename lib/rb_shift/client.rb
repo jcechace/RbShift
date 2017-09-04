@@ -20,7 +20,7 @@ module RbShift
     class InvalidAuthorizationError < StandardError; end
     class InvalidCommandError < StandardError; end
 
-    def initialize(url, bearer_token: nil, username: nil, password: nil)
+    def initialize(url, bearer_token: nil, username: nil, password: nil, verify_ssl: true)
       if bearer_token.nil? && (username.nil? || password.nil?)
         raise InvalidAuthorizationError
       end
@@ -28,10 +28,10 @@ module RbShift
       @token      = bearer_token || Client.get_token(url, username, password)
       @url        = url
       @kubernetes = RestClient::Resource.new "#{url}/api/v1",
-                                             verify_ssl: OpenSSL::SSL::VERIFY_NONE,
+                                             verify_ssl: verify_ssl,
                                              headers:    { Authorization: "Bearer #{@token}" }
       @openshift  = RestClient::Resource.new "#{url}/oapi/v1",
-                                             verify_ssl: OpenSSL::SSL::VERIFY_NONE,
+                                             verify_ssl: verify_ssl,
                                              headers:    { Authorization: "Bearer #{@token}" }
     end
 
