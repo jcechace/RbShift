@@ -8,10 +8,12 @@ module RbShift
   # Representation of OpenShift deployment config
   class DeploymentConfig < OpenshiftKind
     def scale(replicas)
+      log.info "Scaling deployment from deployment config #{name} to #{replicas} replicas"
       @parent.execute "scale dc #{name}", replicas: replicas
     end
 
     def start_deployment(block = false, timeout = 10)
+      log.info "Starting deployment from deployment config #{name}"
       @parent.execute "rollout latest #{name}"
       sleep timeout
       deployments(true)

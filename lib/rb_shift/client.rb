@@ -49,6 +49,8 @@ module RbShift
       request << resource.to_s
       request << "/#{opts[:name]}" if opts[:name]
       client = client resource
+
+      log.debug "Getting #{resource} from #{client}..."
       process_response JSON.parse(client[request].get, symbolize_names: true)
     end
 
@@ -59,10 +61,12 @@ module RbShift
 
     def process_response(response)
       return response[:items] if response[:items]
+      log.debug "Response: #{response}"
       response
     end
 
     def create_project(name, **opts)
+      log.info "Creating project #{name}"
       execute "new-project #{name}", **opts
       project = nil
       project = projects(true).find { |p| p.name == name } until project
