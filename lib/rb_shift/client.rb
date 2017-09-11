@@ -43,6 +43,7 @@ module RbShift
     # @option [String] namespace
     # @option [String] name Name of the resource
     # @return [List] List of resources
+    # rubocop:disable Metrics/AbcSize
     def get(resource, **opts)
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
@@ -78,7 +79,6 @@ module RbShift
       @_projects
     end
 
-    # rubocop:disable Metrics/AbcSize
     def execute(command, **opts)
       oc_cmd = oc_command(command, **opts)
       log.debug oc_cmd
@@ -100,13 +100,6 @@ module RbShift
     def self.get_token(ose_server, username, password)
       `oc login #{ose_server} --username=#{username} --password=#{password} --insecure-skip-tls-verify`
       `oc whoami --show-token`.strip
-    end
-
-    protected
-
-    def list(kind, parent)
-      get(kind.resource_name, namespace: @name)
-        .map { |item| resource_class.new(parent, item) }
     end
 
     private
