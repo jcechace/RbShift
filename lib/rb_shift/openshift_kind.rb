@@ -2,10 +2,13 @@
 # frozen_string_literal: true
 
 require 'json'
+require_relative 'logging/logging_support'
+
 
 module RbShift
   # Abstract parent for all OpenShift resources (kinds)
   class OpenshiftKind
+	include Logging::LoggingSupport	  
     attr_reader :name
 
     def initialize(parent, obj)
