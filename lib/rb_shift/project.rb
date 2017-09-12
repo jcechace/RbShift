@@ -1,6 +1,7 @@
 # coding: utf-8
 # frozen_string_literal: true
 
+require_relative 'core_extensions'
 require_relative 'openshift_kind'
 require_relative 'config_map'
 require_relative 'deployment_config'
@@ -15,49 +16,14 @@ module RbShift
   class Project < OpenshiftKind
     attr_reader :name, :client
 
-    def self.open(name, client)
-      Project.new(name, client)
-    end
-
-    def pods(update = false)
-      @_pods = init_objects(Pod) if update || @_pods.nil?
-      @_pods
-    end
-
-    def deployment_configs(update = false)
-      @_deployment_configs = init_objects(DeploymentConfig) if update || @_deployment_configs.nil?
-      @_deployment_configs
-    end
-
-    def services(update = false)
-      @_services = init_objects(Service) if update || @_services.nil?
-      @_services
-    end
-
-    def secrets(update = false)
-      @_secrets = init_objects(Secret) if update || @_secrets.nil?
-      @_secrets
-    end
-
-    def config_maps(update = false)
-      @_config_maps = init_objects(ConfigMap) if update || @_config_maps.nil?
-      @_config_maps
-    end
-
-    def templates(update = false)
-      @_templates = init_objects(Template) if update || @_templates.nil?
-      @_templates
-    end
-
-    def role_bindings(update = false)
-      @_role_bindings = init_objects(RoleBinding) if update || @_role_bindings.nil?
-      @_role_bindings
-    end
-
-    def routes(update = false)
-      @_routes = init_objects(Route) if update || @_routes.nil?
-      @_routes
-    end
+    resource Pod, :pods
+    resource DeploymentConfig, :deployment_configs
+    resource Secret, :secrets
+    resource Service, :services
+    resource ConfigMap, :config_maps
+    resource Template, :templates
+    resource RoleBinding, :role_bindings
+    resource Route, :routes
 
     def create_secret(name, kind, **opts)
       log.info "Creating secret #{kind} #{name} in project #{@name}"
