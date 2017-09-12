@@ -40,5 +40,33 @@ module RbShift
       deployments(true) if reload
       !deployments.values.select(&:running?).empty?
     end
+
+    # Lists environment variables
+    #
+    # @param [String, nil] container Name of the container or nil for arbitrary container
+    # @return [Hash] A hash of environment variables
+    def env_variables(container = nil)
+      unless @_env
+        containers = @obj[:spec][:template][:spec][:containers]
+        cont       = containers.find { |c| container.nil? || c[:name] == container }
+        @_env      = cont[:env].each_with_object({}) do |var, env|
+          env[var[:name]] = var[:value]
+        end
+      end
+      @_env
+    end
+
+    # Sets environment variables
+    # Using nil as a value will unset that variable
+    #
+    # @param [String, nil] container Name of the container where the environment is set
+    # @param [Hash] env Environment variables
+    def set_env_variable(container = nil, **env)
+      env_string  = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
+      container ||= @obj[:spec][:template][:spec][:containers][0][:name]
+      @parent.execute("env dc/#{container} #{env_string}")
+      reload(true)
+      @_env = nil
+    end
   end
 end
