@@ -4,11 +4,11 @@
 require 'json'
 require_relative 'logging/logging_support'
 
-
 module RbShift
   # Abstract parent for all OpenShift resources (kinds)
   class OpenshiftKind
-	include Logging::LoggingSupport	  
+    include Logging::LoggingSupport
+
     attr_reader :name
 
     def initialize(parent, obj)
@@ -26,9 +26,9 @@ module RbShift
       obj.respond_to? symbol
     end
 
-    def reload
+    def reload(self_only = false)
       self.obj = read_link obj[:metadata][:selfLink]
-      invalidate
+      invalidate unless self_only
     end
 
     def update(patch = nil)
