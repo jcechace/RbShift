@@ -33,6 +33,9 @@ module RbShift
       @openshift  = RestClient::Resource.new "#{url}/oapi/v1",
                                              verify_ssl: verify_ssl,
                                              headers:    { Authorization: "Bearer #{@token}" }
+      @root       = RestClient::Resource.new url,
+                                             verify_ssl: verify_ssl,
+                                             headers: { Authorization: "Bearer #{@token}" }
     end
 
     # @api public
@@ -56,8 +59,7 @@ module RbShift
     end
 
     def read_link(link)
-      v = RestClient.get "#{@url}#{link}", Authorization: "Bearer #{@token}"
-      process_response JSON.parse(v, symbolize_names: true)
+      process_response JSON.parse(@root[link].get, symbolize_names: true)
     end
 
     def process_response(response)
