@@ -107,7 +107,7 @@ module RbShift
       while wait
         log.debug "Waiting for deployments for #{timeout} seconds..."
         sleep timeout
-        wait = !deployment_configs(update).select(&:running?).empty?
+        wait = !deployment_configs(update).values.select(&:running?).empty?
       end
       log.info 'Deployments finished'
     end

@@ -72,7 +72,7 @@ module RbShift
       log.info "Creating project #{name}"
       execute "new-project #{name}", **opts
       project = nil
-      project = projects(true).find { |p| p.name == name } until project
+      project = projects(true)[name] until project
       project
     end
 
