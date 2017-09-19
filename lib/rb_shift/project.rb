@@ -59,9 +59,9 @@ module RbShift
       @_routes
     end
 
-    def create_secret(name, kind, **opts)
+    def create_secret(name, kind, files: nil, literals: nil, **opts)
       log.info "Creating secret #{kind} #{name} in project #{@name}"
-      execute "create secret #{kind} #{name}", **opts
+      execute "create secret #{kind} #{name}", 'from-file': files, 'from-literal': literals, **opts
       secrets true if @_secrets
     end
 
@@ -83,9 +83,9 @@ module RbShift
       templates true if @_templates
     end
 
-    def create_config_map(name, source, path, **opts)
+    def create_config_map(name, files: nil, literals: nil, **opts)
       log.info "Creating config map #{name} in project #{@name}"
-      execute "create configmap #{name}", source.to_sym => path, **opts
+      execute "create configmap #{name}", 'from-file': files, 'from-literal': literals, **opts
       config_maps true if @_config_maps
     end
 

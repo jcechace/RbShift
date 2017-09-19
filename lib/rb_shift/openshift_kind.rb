@@ -3,6 +3,7 @@
 
 require 'json'
 require_relative 'logging/logging_support'
+require 'shellwords'
 
 module RbShift
   # Abstract parent for all OpenShift resources (kinds)
@@ -39,7 +40,7 @@ module RbShift
       end
 
       log.info "Updating #{self.class.class_name} #{@name}"
-      @parent.execute "patch #{self.class.class_name} #{@name} -p '#{patch}"
+      @parent.execute "patch #{self.class.class_name} #{@name} -p #{patch.shellescape}"
     end
 
     def execute(command, **opts)

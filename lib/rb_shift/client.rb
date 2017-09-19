@@ -4,6 +4,7 @@
 require 'rest-client'
 require 'json'
 require 'open3'
+require 'shellwords'
 require_relative 'project'
 require_relative 'logging/logging_support'
 
@@ -84,11 +85,12 @@ module RbShift
     def execute(command, **opts)
       oc_cmd = oc_command(command, **opts)
       log.debug oc_cmd
-      _, stderr, stat = Open3.capture3(oc_cmd)
+      stdout, stderr, stat = Open3.capture3(oc_cmd)
       unless stderr.empty? && stat.success?
         log.error oc_command(command, exclude_token: true, **opts)
         log.error "Command failed with status #{stat.exitstatus} -->"
-        log.error stderr
+        log.debug "Standard Output: #{stdout}"
+        log.error "Error Output: #{stderr}"
         raise InvalidCommandError
       end
     end
@@ -145,11 +147,13 @@ module RbShift
       opts.map do |k, v|
         case v
         when Array
-          v.map { |l| "--#{k}=#{l}" }.join(' ')
+          v.map { |l| "--#{k}=#{l.shellescape}" }.join(' ')
         when Hash
-          v.map { |m, n| "--#{k}=\"#{m}=#{n}\"" }.join(' ')
+          v.map { |m, n| "--#{k}=#{m}=#{n.shellescape}" }.join(' ')
+        when NilClass
+          next
         else
-          "--#{k}=#{v}"
+          "--#{k}=#{v.shellescape}"
         end
       end.join(' ')
     end
