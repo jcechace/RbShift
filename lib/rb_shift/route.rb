@@ -9,8 +9,8 @@ module RbShift
     # Constructs route address
     # @return [String] address
     def address
-      host        = obj[:spec][:host]
-      termination = obj[:spec][:termination]
+      host        = obj.dig(:spec, :host)
+      termination = obj.dig(:spec, :tls, :termination)
       protocol    = termination ? 'https' : 'http'
       "#{protocol}://#{host.chomp '/'}"
     end
