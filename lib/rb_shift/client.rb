@@ -147,13 +147,13 @@ module RbShift
       opts.map do |k, v|
         case v
         when Array
-          v.map { |l| "--#{k}=#{l.shellescape}" }.join(' ')
+          v.map { |l| "--#{k}=#{l.to_s.shellescape}" }.join(' ')
         when Hash
-          v.map { |m, n| "--#{k}=#{m}=#{n.shellescape}" }.join(' ')
+          v.map { |m, n| "--#{k}=#{m}=#{n.to_s.shellescape}" }.join(' ')
         when NilClass
           next
         else
-          "--#{k}=#{v.shellescape}"
+          "--#{k}=#{v.to_s.shellescape}"
         end
       end.join(' ')
     end
