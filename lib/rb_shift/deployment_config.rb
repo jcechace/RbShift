@@ -61,7 +61,7 @@ module RbShift
     #
     # @param [String, nil] container Name of the container where the environment is set
     # @param [Hash] env Environment variables
-    def set_env_variable(container = nil, **env)
+    def set_env_variables(container = nil, **env)
       env_string  = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
       container ||= @obj[:spec][:template][:spec][:containers][0][:name]
       @parent.execute("env dc/#{container} #{env_string}")
