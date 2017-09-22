@@ -130,7 +130,7 @@ module RbShift
       log.info "Creating Openshift application #{source} #{path} in project #{@name}"
       execute 'new-app ', source.to_sym => path, **opts
       wait_for_deployments timeout if block
-      invalidate unless block
+      invalidate
     end
 
     def execute(command, **opts)
