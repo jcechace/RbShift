@@ -101,6 +101,16 @@ module RbShift
       @client.wait_project_deletion(@name, timeout) if block
     end
 
+    # Deletes all resources by label
+    #
+    # @param [String] label_name name of label in selector
+    # @param [String] label_value value of label in selector
+    def delete_by_label(label_name, label_value)
+      log.info "Deleting all resources with #{label_name} label set to #{label_value}"
+      @client.execute 'delete all', selector: "#{label_name}=#{label_value}"
+      invalidate
+    end
+
     def wait_for_deployments(timeout = 30, update = false)
       deployment_configs true
       wait = true
