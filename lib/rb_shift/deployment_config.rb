@@ -1,6 +1,8 @@
 # coding: utf-8
 # frozen_string_literal: true
 
+require 'timeout'
+
 require_relative 'openshift_kind'
 require_relative 'replication_controller'
 
@@ -12,12 +14,15 @@ module RbShift
       @parent.execute "scale dc #{name}", replicas: replicas
     end
 
-    def start_deployment(block = false, timeout = 10)
+    # @param [Bool] block If true blocks until redeployment is finished
+    # @param [Fixnum] timeout Maximum time to wait
+    # @param [Fixnum] polling State checking period
+    def start_deployment(block: false, timeout: 60, polling: 5)
       log.info "Starting deployment from deployment config #{name}"
       @parent.execute "rollout latest #{name}"
-      sleep timeout
+      sleep polling * 2
       deployments(true)
-      sleep timeout while running? && block
+      Timeout.timeout(timeout) { sleep polling while running? } if block
     end
 
     # rubocop:disable Layout/ExtraSpacing
@@ -25,8 +30,8 @@ module RbShift
       dc_label = 'openshift.io/deployment-config.name'.to_sym
       if update || @_deployments.nil?
         items = @parent.client
-                       .get('replicationcontrollers', namespace: @parent.name)
-                       .select { |item| item[:metadata][:annotations][dc_label] == @name }
+                  .get('replicationcontrollers', namespace: @parent.name)
+                  .select { |item| item[:metadata][:annotations][dc_label] == @name }
 
         @_deployments = items.each_with_object({}) do |item, hash|
           resource            = ReplicationController.new(self, item)
@@ -60,11 +65,15 @@ module RbShift
     # Using nil as a value will unset that variable
     #
     # @param [String, nil] container Name of the container where the environment is set
+    # @param [Bool] block If true blocks until redeployment is finished
+    # @param [Fixnum] timeout Maximum time to wait
+    # @param [Fixnum] polling State checking period
     # @param [Hash] env Environment variables
-    def set_env_variables(container = nil, **env)
+    def set_env_variables(container = nil, block: false, timeout: 60, polling: 5,  **env)
       env_string  = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
       container ||= @obj[:spec][:template][:spec][:containers][0][:name]
       @parent.execute("env dc/#{container} #{env_string}")
+      Timeout.timeout(timeout) { sleep polling while running? } if block
       reload(true)
       @_env = nil
     end

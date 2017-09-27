@@ -5,10 +5,15 @@ AllCops:
 Layout/ExtraSpacing:
   Enabled: true
   AllowForAlignment: true
-  ForceEqualSignAlignment: true
+  ForceEqualSignAlignment: false
 
 Layout/SpaceAroundOperators:
+  Enabled: false
   AllowForAlignment: true
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented_relative_to_receiver
+  IndentationWidth: 2
 
 Style/HashSyntax:
   Enabled: false
@@ -19,18 +24,35 @@ Style/GuardClause:
 Style/WordArray:
   EnforcedStyle: brackets
 
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
 Metrics/LineLength:
   Enabled: true
   Max: 100
+  IgnoredPatterns:
+   - '^\s*#.*$'
 
 Metrics/ClassLength:
-  Max: 150
+  Enabled: false
 
 Metrics/ModuleLength:
-  Max: 150
+  Enabled: false
 
 Metrics/BlockLength:
   Enabled: false
 
 Metrics/MethodLength:
-  Max: 20
+  Enabled: false
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
+Metrics/AbcSize:
+  Enabled: false

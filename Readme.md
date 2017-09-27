@@ -47,7 +47,7 @@ my_proj.create_template '/home/user/template.yml'
 # Start application from template this will be translated to oc command
 # oc new-app template TemplateName --param='param1=Value1' --param='param2=Value2' --env='SOME_VAR=Value3' --group='gr1' --group='gr2'
 # This command is blocking
-my_proj.new_app, 'template', 'TemplateName', true, 10, param: 
+my_proj.new_app, 'template', 'TemplateName', block: true, timeout: 30, param: 
   {
     param1: 'Value1',
     param2: 'Value2',
@@ -75,7 +75,7 @@ dc = my_proj.deployments['DCName']
 dc.start_deployment
 
 # Start deployment and block until it finishes with specified timeout
-dc.start_deployment true, 30
+dc.start_deployment block: true, timeout: 30
 ```
 
 ## Creating route

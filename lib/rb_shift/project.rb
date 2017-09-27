@@ -111,25 +111,24 @@ module RbShift
       invalidate
     end
 
-    def wait_for_deployments(timeout = 30, update = false)
+    def wait_for_deployments(update: false, timeout: 60, polling: 5)
       deployment_configs true
-      wait = true
-      while wait
-        log.debug "Waiting for deployments for #{timeout} seconds..."
-        sleep timeout
-        wait = !deployment_configs(update).values.select(&:running?).empty?
+      Timeout.timeout(timeout) do
+        log.info "Waiting for deployments for #{timeout} seconds..."
+        loop do
+          log.debug "--> Checking deployments after #{polling} seconds..."
+          sleep polling
+          break if deployment_configs(update).values.select(&:running?).empty?
+        end
       end
       log.info 'Deployments finished'
     end
 
     # Creates new Openshift application
-    # Params:
-    # +params+ - hash of key-value pairs to set/override a parameter value in the template
-    # +args+ - any desired custom OC command options
-    def new_app(source, path, block = false, timeout = 30, **opts)
+    def new_app(source, path, block: false, timeout: 600, polling: 30, **opts)
       log.info "Creating Openshift application #{source} #{path} in project #{@name}"
       execute 'new-app ', source.to_sym => path, **opts
-      wait_for_deployments timeout if block
+      wait_for_deployments(update: true, timeout: timeout, polling: polling) if block
       invalidate
     end
 
