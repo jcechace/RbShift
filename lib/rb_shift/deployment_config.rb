@@ -22,7 +22,19 @@ module RbShift
       @parent.execute "rollout latest #{name}"
       sleep polling * 2
       deployments(true)
-      Timeout.timeout(timeout) { sleep polling while running? } if block
+      wait_for_deployments(timeout: timeout, polling: polling) if block
+    end
+
+    def wait_for_deployments(timeout: 60, polling: 5)
+      Timeout.timeout(timeout) do
+        log.info "Waiting for deployments of #{name} for #{timeout} seconds..."
+        loop do
+          log.debug "--> Checking deployments after #{polling} seconds..."
+          sleep polling
+          break unless running?
+        end
+      end
+      log.info 'Deployments finished'
     end
 
     # rubocop:disable Layout/ExtraSpacing
