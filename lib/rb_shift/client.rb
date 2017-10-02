@@ -47,7 +47,6 @@ module RbShift
     # @option [String] namespace
     # @option [String] name Name of the resource
     # @return [List] List of resources
-    # rubocop:disable Metrics/AbcSize
     def get(resource, **opts)
       request = String.new
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
@@ -65,7 +64,6 @@ module RbShift
 
     def process_response(response)
       return response[:items] if response[:items]
-      log.debug "Response: #{response}"
       response
     end
 
