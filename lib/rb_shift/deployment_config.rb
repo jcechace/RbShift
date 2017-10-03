@@ -84,8 +84,10 @@ module RbShift
     def set_env_variables(container = nil, block: false, timeout: 60, polling: 5,  **env)
       env_string  = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
       container ||= @obj[:spec][:template][:spec][:containers][0][:name]
+      log.info "Setting env variables (#{env_string}) for #{name}/#{container}"
       @parent.execute("env dc/#{container} #{env_string}")
-      Timeout.timeout(timeout) { sleep polling while running? } if block
+      sleep polling
+      wait_for_deployments(timeout: timeout, polling: polling) if block
       reload(true)
       @_env = nil
     end
