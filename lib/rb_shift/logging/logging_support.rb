@@ -24,7 +24,7 @@ module Logging
     # @param [Class] klass Class instance
     # @return [String] class name without modules
     def self.get_class_name(klass)
-      klass.class.name.split('::').last
+      klass.class.name
     end
 
     # @api public
