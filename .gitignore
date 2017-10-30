@@ -16,3 +16,6 @@
 
 # rbenv
 .ruby-version
+
+# openshift configuration
+/openshift.config/
