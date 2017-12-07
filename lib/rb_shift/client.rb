@@ -89,7 +89,7 @@ module RbShift
         log.error "Command failed with status #{stat.exitstatus} -->"
         log.debug "Standard Output: #{stdout}"
         log.error "Error Output: #{stderr}"
-        raise InvalidCommandError
+        raise InvalidCommandError, "ERROR: #{stdout} #{stderr}"
       end
     end
 
