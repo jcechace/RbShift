@@ -8,7 +8,6 @@ require_relative 'replication_controller'
 module RbShift
   # Representation of OpenShift deployment config
   class DeploymentConfig < OpenshiftKind
-
     def scale(replicas)
       log.info "Scaling deployment from deployment config #{name} to #{replicas} replicas"
       @parent.execute "scale dc #{name}", replicas: replicas
@@ -31,7 +30,7 @@ module RbShift
         loop do
           log.debug "--> Checking deployments after #{polling} seconds..."
           sleep polling
-          break unless running?
+          break unless running?(true)
         end
       end
       log.info 'Deployments finished'
