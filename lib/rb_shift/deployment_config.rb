@@ -36,7 +36,6 @@ module RbShift
       log.info 'Deployments finished'
     end
 
-    # rubocop:disable Layout/ExtraSpacing
     def deployments(update = false)
       dc_label = 'openshift.io/deployment-config.name'.to_sym
       if update || @_deployments.nil?
@@ -79,8 +78,8 @@ module RbShift
     # @param [Fixnum] timeout Maximum time to wait
     # @param [Fixnum] polling State checking period
     # @param [Hash] env Environment variables
-    def set_env_variables(container_name = nil, block: false, timeout: 60, polling: 5,  **env)
-      env_string  = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
+    def set_env_variables(container_name = nil, block: false, timeout: 60, polling: 5, **env)
+      env_string       = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
       container_name ||= container[:name]
       log.info "Setting env variables (#{env_string}) for #{name}/#{container_name}"
       @parent.execute("env dc/#{container_name} #{env_string}")
@@ -163,7 +162,7 @@ module RbShift
     # @param [Hash] config Volume config
     # @param [Hash] kwargs Optional arguments
     def create_volume(volume_name, config:, **kwargs)
-      object                    = { name: volume_name }.merge(config).merge(kwargs)
+      object = { name: volume_name }.merge(config).merge(kwargs)
       log.info "Creating volume: #{object}"
       volumes << object
     end
@@ -175,7 +174,7 @@ module RbShift
     # @param [String] mount_path Mount path
     # @param [Hash] kwargs Optional arguments
     def mount_volume(container_name = nil, volume_name:, mount_path:, **kwargs)
-      object                = { name: volume_name, mountPath: mount_path }.merge(kwargs)
+      object = { name: volume_name, mountPath: mount_path }.merge(kwargs)
       log.info("Mounting volume: #{object}")
       volume_mounts(container_name) << object
     end

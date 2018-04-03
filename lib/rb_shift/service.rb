@@ -1,4 +1,3 @@
-# coding: utf-8
 # frozen_string_literal: true
 
 require_relative 'openshift_kind'
@@ -25,12 +24,16 @@ module RbShift
       routes true if @_routes
     end
 
+    def ports
+      @obj[:spec][:ports].each_with_object({}) { |v, h| h[v[:name].to_sym] = v }
+    end
+
     private
 
     def load_routes
       items = @parent.client
-                     .get('routes', namespace: @parent.name)
-                     .select { |item| item[:spec][:to][:name] == @name }
+                .get('routes', namespace: @parent.name)
+                .select { |item| item[:spec][:to][:name] == @name }
 
       items.each_with_object({}) do |item, hash|
         resource            = Route.new(self, item)

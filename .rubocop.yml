@@ -27,9 +27,6 @@ Style/WordArray:
 Style/SymbolArray:
   EnforcedStyle: brackets
 
-Style/TrailingCommaInLiteral:
-  EnforcedStyleForMultiline: consistent_comma
-
 Style/ClassAndModuleChildren:
   Enabled: false
 

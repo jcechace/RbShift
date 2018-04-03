@@ -1,4 +1,4 @@
-# coding: utf-8
+
 # frozen_string_literal: true
 
 require 'logger'
@@ -11,8 +11,8 @@ module Logging
     #
     # @return [Logger] Logger
     def log
-      cls_name  = Logging::LoggingSupport.get_class_name self
-      @logger ||= Logging::LoggingSupport.get_logger(log_level: log_level, name: cls_name)
+      cls_name = Logging::LoggingSupport.get_class_name self
+      @log   ||= Logging::LoggingSupport.get_logger(log_level: log_level, name: cls_name)
     end
 
     def log_level

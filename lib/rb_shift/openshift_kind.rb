@@ -1,4 +1,4 @@
-# coding: utf-8
+
 # frozen_string_literal: true
 
 require 'json'
@@ -10,12 +10,13 @@ module RbShift
   class OpenshiftKind
     include Logging::LoggingSupport
 
-    attr_reader :name
+    attr_reader :name, :namespace
 
     def initialize(parent, obj)
-      @parent = parent
-      @name   = obj[:metadata][:name]
-      @obj    = obj
+      @parent    = parent
+      @name      = obj[:metadata][:name]
+      @namespace = obj[:metadata][:namespace]
+      @obj       = obj
     end
 
     def method_missing(symbol, *args)

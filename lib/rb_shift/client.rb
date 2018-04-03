@@ -1,4 +1,3 @@
-# coding: utf-8
 # frozen_string_literal: true
 
 require 'rest-client'
@@ -22,9 +21,7 @@ module RbShift
     class InvalidCommandError < StandardError; end
 
     def initialize(url, bearer_token: nil, username: nil, password: nil, verify_ssl: true)
-      if bearer_token.nil? && (username.nil? || password.nil?)
-        raise InvalidAuthorizationError
-      end
+      raise InvalidAuthorizationError if bearer_token.nil? && (username.nil? || password.nil?)
 
       @token      = bearer_token || Client.get_token(url, username, password)
       @url        = url
@@ -48,7 +45,7 @@ module RbShift
     # @option [String] name Name of the resource
     # @return [List] List of resources
     def get(resource, **opts)
-      request = String.new
+      request = +''
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
       request << resource.to_s
       request << "/#{opts[:name]}" if opts[:name]
@@ -103,6 +100,7 @@ module RbShift
       `oc login #{ose_server} --username=#{username} --password=#{password} --insecure-skip-tls-verify`
       `oc whoami --show-token`.strip
     end
+    # rubocop:enable Metrics/LineLength
 
     private
 
@@ -133,6 +131,7 @@ module RbShift
         .uniq
     end
 
+    # rubocop:disable Naming/MemoizedInstanceVariableName
     def kube_entities
       @_kube_entities ||= load_entities(@kubernetes)
     end
@@ -140,6 +139,7 @@ module RbShift
     def os_entities
       @_os_entities ||= load_entities(@openshift)
     end
+    # rubocop:enable Naming/MemoizedInstanceVariableName
 
     def unfold_opts(opts)
       opts.map do |k, v|
