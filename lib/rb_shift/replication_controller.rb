@@ -18,5 +18,12 @@ module RbShift
       reload
       phase == 'Completed'
     end
+
+    def scaled?(replicas: 0)
+      reload(true)
+      return true if replicas == 0 and obj[:status][:replicas] == 0
+      ready_replicas = obj[:status][:readyReplicas]
+      !ready_replicas.nil? and ready_replicas == replicas
+    end
   end
 end

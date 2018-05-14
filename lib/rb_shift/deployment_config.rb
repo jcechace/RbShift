@@ -8,9 +8,26 @@ require_relative 'replication_controller'
 module RbShift
   # Representation of OpenShift deployment config
   class DeploymentConfig < OpenshiftKind
-    def scale(replicas)
+    def scale(replicas, block: false, timeout: 60, polling: 5)
       log.info "Scaling deployment from deployment config #{name} to #{replicas} replicas"
       @parent.execute "scale dc #{name}", replicas: replicas
+      wait_for_scale(replicas: replicas, timeout: timeout, polling: polling) if block
+    end
+
+    def wait_for_scale(replicas: 0,timeout: 60, polling: 5)
+      Timeout.timeout(timeout) do
+        log.info("Waiting for scale of #{name} for #{timeout} seconds...")
+        loop do
+          log.debug("--> Checking deployment after #{polling} seconds...")
+          sleep polling
+          break if scaled?(reload: true, replicas: replicas)
+        end
+      end
+    end
+
+    def scaled?(reload: false, replicas: replicas)
+      deployments(true) if reload
+      deployments.values.last.scaled?(replicas: replicas)
     end
 
     # @param [Bool] block If true blocks until redeployment is finished
