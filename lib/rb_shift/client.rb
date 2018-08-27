@@ -34,6 +34,8 @@ module RbShift
       @root       = RestClient::Resource.new url,
                                              verify_ssl: verify_ssl,
                                              headers: { Authorization: "Bearer #{@token}" }
+
+      log.debug("RbShift client created for #{@url}")
     end
 
     # @api public
@@ -49,6 +51,7 @@ module RbShift
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
       request << resource.to_s
       request << "/#{opts[:name]}" if opts[:name]
+      log.debug("[GET] Request: #{request}")
       client = client resource
 
       log.debug "Getting #{resource} from #{client}..."
@@ -78,6 +81,7 @@ module RbShift
     end
 
     def execute(command, **opts)
+      log.debug("[EXEC] Executing command #{command} with opts: #{opts}")
       oc_cmd = oc_command(command, **opts)
       log.debug oc_cmd
       stdout, stderr, stat = Open3.capture3(oc_cmd)
