@@ -25,7 +25,7 @@ module RbShift
       end
     end
 
-    def scaled?(reload: false, replicas: replicas)
+    def scaled?(reload: false, replicas: 1)
       deployments(true) if reload
       deployments.values.last.scaled?(replicas: replicas)
     end

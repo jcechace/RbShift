@@ -47,13 +47,15 @@ my_proj.create_template '/home/user/template.yml'
 # Start application from template this will be translated to oc command
 # oc new-app template TemplateName --param='param1=Value1' --param='param2=Value2' --env='SOME_VAR=Value3' --group='gr1' --group='gr2'
 # This command is blocking
-my_proj.new_app, 'template', 'TemplateName', block: true, timeout: 30, param: 
+my_proj.new_app 'template', 'TemplateName', block: true, timeout: 30, param: 
   {
     param1: 'Value1',
     param2: 'Value2',
-  }, env: {
+  }, 
+  env: {
    SOME_VAR: 'Value3',
-  }, group:
+  }, 
+  group:
   [
     'Gr1',
     'Gr2',
@@ -94,4 +96,14 @@ service.create_route 'Route3', 'route3.example.com', 'passthrough'
 
 # Create route encrypted by custom certificate
 service.create_route 'Route4', 'route4.example.com', 'ca-cert': '/home/user/ca.pem', cert: '/home/user/cert.pem', key: '/home/user/key.pem'
+```
+
+
+## Env Variables
+
+Logging related:
+
+```shell
+RB_SHIFT_LOG_LEVEL=(debug|info|warn|error)
+RB_SHIFT_LOG_RESPONSES=(true|false)
 ```

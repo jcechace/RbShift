@@ -17,8 +17,10 @@ module RbShift
 
     attr_reader :token, :url
 
-    class InvalidAuthorizationError < StandardError; end
-    class InvalidCommandError < StandardError; end
+    class InvalidAuthorizationError < StandardError;
+    end
+    class InvalidCommandError < StandardError;
+    end
 
     def initialize(url, bearer_token: nil, username: nil, password: nil, verify_ssl: true)
       raise InvalidAuthorizationError if bearer_token.nil? && (username.nil? || password.nil?)
@@ -33,9 +35,9 @@ module RbShift
                                              headers:    { Authorization: "Bearer #{@token}" }
       @root       = RestClient::Resource.new url,
                                              verify_ssl: verify_ssl,
-                                             headers: { Authorization: "Bearer #{@token}" }
+                                             headers:    { Authorization: "Bearer #{@token}" }
 
-      log.debug("RbShift client created for #{@url}")
+      log.info("RbShift client created for #{@url}")
     end
 
     # @api public
@@ -51,11 +53,9 @@ module RbShift
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
       request << resource.to_s
       request << "/#{opts[:name]}" if opts[:name]
-      log.debug("[GET] Request: #{request}")
       client = client resource
-
       log.debug "Getting #{resource} from #{client}..."
-      process_response JSON.parse(client[request].get, symbolize_names: true)
+      make_get_request(client, request)
     end
 
     def read_link(link)
@@ -63,7 +63,8 @@ module RbShift
     end
 
     def process_response(response)
-      return response[:items] if response[:items]
+      response = response.keys.include?(:items) ? response[:items] : response
+      log.debug(" -> Response #{response}") if ENV['RB_SHIFT_LOG_RESPONSES']
       response
     end
 
@@ -104,9 +105,19 @@ module RbShift
       `oc login #{ose_server} --username=#{username} --password=#{password} --insecure-skip-tls-verify`
       `oc whoami --show-token`.strip
     end
+
     # rubocop:enable Metrics/LineLength
 
     private
+
+    def make_get_request(client, request_path)
+      request = client[request_path]
+      log.debug("[GET] Request [#{request.url}]")
+      response = request.get
+      process_response JSON.parse(response, symbolize_names: true)
+    rescue RestClient::ExceptionWithResponse => ex
+      log.error("[RESPONSE] Error response: #{ex.response}")
+    end
 
     def oc_command(command, exclude_token: false, **opts)
       token = exclude_token ? '***' : @token
@@ -128,6 +139,7 @@ module RbShift
     end
 
     def load_entities(client)
+      log.debug("[LOAD] Loading entities: #{client.url}")
       JSON
         .parse(client.get)['resources']
         .reject { |resource| resource['name'].include?('/') }
@@ -143,6 +155,7 @@ module RbShift
     def os_entities
       @_os_entities ||= load_entities(@openshift)
     end
+
     # rubocop:enable Naming/MemoizedInstanceVariableName
 
     def unfold_opts(opts)
