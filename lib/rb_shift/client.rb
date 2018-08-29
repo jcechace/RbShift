@@ -59,7 +59,8 @@ module RbShift
     end
 
     def read_link(link)
-      process_response JSON.parse(@root[link].get, symbolize_names: true)
+      response = make_request(@root[link])
+      process_response JSON.parse(response, symbolize_names: true)
     end
 
     def process_response(response)
@@ -112,11 +113,8 @@ module RbShift
 
     def make_get_request(client, request_path)
       request = client[request_path]
-      log.debug("[GET] Request [#{request.url}]")
-      response = request.get
+      response = make_request request
       process_response JSON.parse(response, symbolize_names: true)
-    rescue RestClient::ExceptionWithResponse => ex
-      log.error("[RESPONSE] Error response: #{ex.response}")
     end
 
     def oc_command(command, exclude_token: false, **opts)
@@ -138,10 +136,19 @@ module RbShift
       end
     end
 
+    def make_request(client)
+      addition = ENV['RB_CLOAK_LOG_FULL_REQUEST'] ? ": #{client}": ''
+      log.debug("[REQUEST] Making Request #{client.url} #{addition} ")
+      client.get
+    rescue RestClient::ExceptionWithResponse => ex
+      log.error("[RESPONSE] Error response: #{ex.response}")
+      ex.response
+    end
+
     def load_entities(client)
-      log.debug("[LOAD] Loading entities: #{client.url}")
+      response = make_request client
       JSON
-        .parse(client.get)['resources']
+        .parse(response)['resources']
         .reject { |resource| resource['name'].include?('/') }
         .map { |resource| resource['name'] }
         .uniq
