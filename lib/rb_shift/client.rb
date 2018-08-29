@@ -137,8 +137,7 @@ module RbShift
     end
 
     def make_request(client)
-      addition = ENV['RB_CLOAK_LOG_FULL_REQUEST'] ? ": #{client}": ''
-      log.debug("[REQUEST] Making Request #{client.url} #{addition} ")
+      log.debug("[REQUEST] Making Request #{client.url}")
       client.get
     rescue RestClient::ExceptionWithResponse => ex
       log.error("[RESPONSE] Error response: #{ex.response}")

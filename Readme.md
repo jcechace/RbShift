@@ -106,4 +106,5 @@ Logging related:
 ```shell
 RB_SHIFT_LOG_LEVEL=(debug|info|warn|error)
 RB_SHIFT_LOG_RESPONSES=(true|false)
+RESTCLIENT_LOG=stdout
 ```
