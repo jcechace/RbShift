@@ -5,7 +5,7 @@ require 'json'
 require 'open3'
 require 'shellwords'
 require_relative 'project'
-require_relative 'logging/logging_support'
+require_relative 'logging'
 
 #
 # Ruby wrapper for oc tools
@@ -13,7 +13,7 @@ require_relative 'logging/logging_support'
 module RbShift
   # Client starting point
   class Client
-    include Logging::LoggingSupport
+    include Logging
 
     attr_reader :token, :url
 
@@ -22,6 +22,14 @@ module RbShift
     class InvalidCommandError < StandardError
     end
 
+    # @api public
+    # Creates instance of the RbShift client
+    #
+    # @param [string] url Url to the openshift cluster
+    # @param [string] bearer_token Token for authorization
+    # @param [string] username Username
+    # @param [string] password Password
+    # @param [bool] verify_ssl Whether to verify the ssl
     def initialize(url, bearer_token: nil, username: nil, password: nil, verify_ssl: true)
       raise InvalidAuthorizationError if bearer_token.nil? && (username.nil? || password.nil?)
 
@@ -29,15 +37,14 @@ module RbShift
       @url        = url
       @kubernetes = RestClient::Resource.new "#{url}/api/v1",
                                              verify_ssl: verify_ssl,
-                                             headers:    { Authorization: "Bearer #{@token}" }
+                                             headers:    { Authorization: "Bearer #{token}" }
       @openshift  = RestClient::Resource.new "#{url}/oapi/v1",
                                              verify_ssl: verify_ssl,
-                                             headers:    { Authorization: "Bearer #{@token}" }
+                                             headers:    { Authorization: "Bearer #{token}" }
       @root       = RestClient::Resource.new url,
                                              verify_ssl: verify_ssl,
-                                             headers:    { Authorization: "Bearer #{@token}" }
-
-      log.info("RbShift client created for #{@url}")
+                                             headers:    { Authorization: "Bearer #{token}" }
+      log.info("RbShift client created for #{url}")
     end
 
     # @api public
@@ -155,7 +162,6 @@ module RbShift
         .uniq
     end
 
-    # rubocop:disable Naming/MemoizedInstanceVariableName
     def kube_entities
       @_kube_entities ||= load_entities(@kubernetes)
     end
@@ -163,8 +169,6 @@ module RbShift
     def os_entities
       @_os_entities ||= load_entities(@openshift)
     end
-
-    # rubocop:enable Naming/MemoizedInstanceVariableName
 
     def unfold_opts(opts)
       opts.map do |k, v|

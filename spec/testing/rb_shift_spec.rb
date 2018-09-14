@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 require 'uri'
-
-require_relative '../client'
+require 'rb_shift/client'
 
 module RbShift
   module Testing
@@ -14,8 +13,8 @@ module RbShift
       def initialize(name)
         super
         @client = RbShift::Client.new 'https://127.0.0.1:8443',
-                                      username: :admin,
-                                      password: :admin,
+                                      username:   :admin,
+                                      password:   :admin,
                                       verify_ssl: false
       end
     end

@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 require 'json'
-require_relative 'logging/logging_support'
 require 'shellwords'
 require 'forwardable'
 require_relative 'metadata'
 
+require_relative 'logging'
+
+
 module RbShift
   # Abstract parent for all OpenShift resources (kinds)
   class OpenshiftKind
-    include Logging::LoggingSupport
+    include Logging
     extend Forwardable
 
     attr_reader :metadata
@@ -44,17 +46,17 @@ module RbShift
       end
 
       log.info "Updating #{self.class.class_name} #{name}"
-      @parent.execute 'patch', self.class.class_name, name, "-p #{patch}"
+      execute "patch #{self.class.class_name} #{name} -p #{patch.shellescape}"
     end
 
-    def execute(command, *args, **opts)
-      @parent.execute(command, *args, **opts) if @parent.respond_to? :execute
+    def execute(command, **opts)
+      parent.execute(command, **opts) if parent.respond_to? :execute
     end
 
     def delete
       log.info "Deleting #{self.class.class_name} #{name}"
-      @parent.execute 'delete', self.class.class_name, name
-      @parent.invalidate if @parent.respond_to? :invalidate
+      execute "delete #{self.class.class_name} #{name}"
+      parent.invalidate if parent.respond_to? :invalidate
     end
 
     def invalidate
@@ -72,11 +74,11 @@ module RbShift
     end
 
     def read_link(link)
-      @parent.read_link link
+      parent.read_link link
     end
 
     protected
 
-    attr_accessor :obj
+    attr_accessor :obj, :parent
   end
 end

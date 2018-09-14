@@ -2,13 +2,13 @@
 
 require 'open3'
 
-require_relative '../logging/logging_support'
+require 'rb_shift/logging'
 
 module RbShift
   module Testing
     # Supports setup and clean up of oc cluster
     module Bootstrap
-      extend Logging::LoggingSupport
+      extend Logging
 
       class OcClusterIsRunningError < StandardError
       end

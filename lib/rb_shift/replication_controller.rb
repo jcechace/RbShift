@@ -21,9 +21,10 @@ module RbShift
 
     def scaled?(replicas: 0)
       reload(true)
-      return true if replicas == 0 and obj[:status][:replicas] == 0
+      return true if replicas.zero? && obj[:status][:replicas].zero?
+
       ready_replicas = obj[:status][:readyReplicas]
-      !ready_replicas.nil? and ready_replicas == replicas
+      !ready_replicas.nil? && ready_replicas == replicas
     end
   end
 end

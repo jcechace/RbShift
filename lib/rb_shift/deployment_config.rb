@@ -10,7 +10,7 @@ module RbShift
   class DeploymentConfig < OpenshiftKind
     def scale(replicas, block: false, timeout: 60, polling: 5)
       log.info "Scaling deployment from deployment config #{name} to #{replicas} replicas"
-      @parent.execute 'scale dc', name, replicas: replicas
+      execute "scale dc #{name}", replicas: replicas
       wait_for_scale(replicas: replicas, timeout: timeout, polling: polling) if block
     end
 
@@ -35,7 +35,7 @@ module RbShift
     # @param [Fixnum] polling State checking period
     def start_deployment(block: false, timeout: 60, polling: 5)
       log.info "Starting deployment from deployment config #{name}"
-      @parent.execute 'rollout latest', name
+      execute "rollout latest #{name}"
       sleep polling * 2
       deployments(true)
       wait_for_deployments(timeout: timeout, polling: polling) if block
@@ -56,7 +56,7 @@ module RbShift
     def deployments(update = false)
       dc_label = 'openshift.io/deployment-config.name'.to_sym
       if update || @_deployments.nil?
-        items = @parent.client
+        items = parent.client
                   .get('replicationcontrollers', namespace: @parent.name)
                   .select { |item| item[:metadata][:annotations][dc_label] == name }
 

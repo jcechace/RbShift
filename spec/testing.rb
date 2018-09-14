@@ -4,6 +4,7 @@ require 'minitest/autorun'
 require 'minitest/hooks/default'
 
 require_relative 'testing/rb_shift_spec'
+
 module RbShift
   # Testing module
   module Testing
