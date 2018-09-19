@@ -106,7 +106,7 @@ module RbShift
     # @param [String] label_value value of label in selector
     def delete_by_label(label_name, label_value)
       log.info "Deleting all resources with #{label_name} label set to #{label_value}"
-      @client.execute 'delete all', selector: "#{label_name}=#{label_value}"
+      execute 'delete all', selector: "#{label_name}=#{label_value}"
       invalidate
     end
 
