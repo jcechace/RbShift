@@ -18,5 +18,15 @@ module RbShift
       command_params = dirs.join(' ')
       execute("rsync #{command_params}", **kwargs)
     end
+
+    def logs(update = false)
+      if update || @_logs.nil?
+        @_logs = @parent.client.get(
+            Pod.resource_name, namespace: @namespace, name: @name, attribute: 'log', raw: true
+        )
+      end
+
+      @_logs
+    end
   end
 end

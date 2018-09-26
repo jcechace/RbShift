@@ -54,15 +54,21 @@ module RbShift
     # @param [List] opts Options
     # @option [String] namespace
     # @option [String] name Name of the resource
-    # @return [List] List of resources
+    # @option [Bool] raw Whether to return raw text response
+    # @return [List|String] List of resources | Raw String response
     def get(resource, **opts)
       request = +''
       request << "namespaces/#{opts[:namespace]}/" if opts[:namespace]
       request << resource.to_s
       request << "/#{opts[:name]}" if opts[:name]
+      request << "/#{opts[:attribute]}" if opts[:attribute]
       client = client resource
       log.debug "Getting #{resource} from #{client}..."
-      make_get_request(client, request)
+
+      response = make_get_request(client, request)
+      return process_response response if opts[:raw]
+
+      process_response JSON.parse(response, symbolize_names: true)
     end
 
     def read_link(link)
@@ -71,7 +77,11 @@ module RbShift
     end
 
     def process_response(response)
-      response = response.key?(:items) ? response[:items] : response
+      response = if response.respond_to?(:keys)
+                   response.keys.include?(:items) ? response[:items] : response
+                 else
+                   response
+                 end
       log.debug(" -> Response #{response}") if ENV['RB_SHIFT_LOG_RESPONSES']
       response
     end
@@ -119,8 +129,7 @@ module RbShift
 
     def make_get_request(client, request_path)
       request = client[request_path]
-      response = make_request request
-      process_response JSON.parse(response, symbolize_names: true)
+      make_request request
     end
 
     # rubocop:disable  Metrics/LineLength
