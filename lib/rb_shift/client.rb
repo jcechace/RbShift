@@ -66,9 +66,10 @@ module RbShift
       log.debug "Getting #{resource} from #{client}..."
 
       response = make_get_request(client, request)
-      return process_response response if opts[:raw]
 
-      process_response JSON.parse(response, symbolize_names: true)
+      response = JSON.parse(response, symbolize_names: true) unless opts[:raw]
+
+      process_response response
     end
 
     def read_link(link)
@@ -80,8 +81,9 @@ module RbShift
       response = if response.respond_to?(:keys)
                    response.keys.include?(:items) ? response[:items] : response
                  else
-                   response
+                   response.to_s
                  end
+
       log.debug(" -> Response #{response}") if ENV['RB_SHIFT_LOG_RESPONSES']
       response
     end
