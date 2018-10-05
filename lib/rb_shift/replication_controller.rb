@@ -26,5 +26,14 @@ module RbShift
       ready_replicas = obj[:status][:readyReplicas]
       !ready_replicas.nil? && ready_replicas == replicas
     end
+
+    def pods(update = false)
+      if update || @_pods.nil?
+        @_pods = parent.parent.pods(update).select do |_, val|
+          val.obj[:metadata][:annotations]['openshift.io/deployment.name'.to_sym] == @name
+        end
+      end
+      @_pods
+    end
   end
 end
