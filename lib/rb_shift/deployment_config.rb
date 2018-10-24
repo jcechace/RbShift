@@ -99,7 +99,7 @@ module RbShift
       env_string       = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
       container_name ||= container[:name]
       log.info "Setting env variables (#{env_string}) for #{name}/#{container_name}"
-      @parent.execute("env dc/#{container_name} #{env_string}")
+      @parent.execute("set env dc/#{container_name} #{env_string}")
       sleep polling
       wait_for_deployments(timeout: timeout, polling: polling) if block
       reload(true)
