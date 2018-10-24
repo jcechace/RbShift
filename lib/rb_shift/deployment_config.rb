@@ -81,7 +81,7 @@ module RbShift
       unless @_env
         cont       = container(container_name)
         @_env      = cont[:env].each_with_object({}) do |var, env|
-          env[var[:name]] = var[:value]
+          env[var[:name]] = var.fetch(:value) { resolve_value(var[:valueFrom]) }
         end
       end
       @_env
@@ -134,6 +134,24 @@ module RbShift
 
     private
 
+    # Resolve environment reference to a Secret or a ConfigMap
+    # @param [Hash] obj valueFrom reference
+    # @return [String] resolved value from the ConfigMap or a Secret
+    def resolve_value(obj)
+      project = @parent
+      kind = case
+             when (ref = obj[:configMapKeyRef]) then ConfigMap
+             when (ref = obj[:secretKeyRef]) then Secret
+             else
+               log.debug "Unable to resolve value of #{obj}"
+               return
+             end
+
+      # TODO: would be nicer if this would be provided by the Project (and not need to load ALL objects of the same type)
+      resource = kind.new(project, project.client.get(kind.resource_name, name: ref.fetch(:name), namespace: project.name))
+      resource[ref[:key]]
+    end
+        
     # Gets template spec
     # @return [Hash] Template spec
     def template_spec
