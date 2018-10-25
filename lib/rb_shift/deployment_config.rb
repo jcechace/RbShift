@@ -80,7 +80,7 @@ module RbShift
     def env_variables(container_name = nil)
       unless @_env
         cont       = container(container_name)
-        @_env      = cont[:env].each_with_object({}) do |var, env|
+        @_env      = Array(cont[:env]).each_with_object({}) do |var, env|
           env[var[:name]] = var.fetch(:value) { resolve_value(var[:valueFrom]) }
         end
       end
