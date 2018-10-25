@@ -138,6 +138,7 @@ module RbShift
     # @param [Hash] obj valueFrom reference
     # @return [String] resolved value from the ConfigMap or a Secret
     def resolve_value(obj)
+      return unless obj
       project = @parent
       kind = case
              when (ref = obj[:configMapKeyRef]) then ConfigMap
