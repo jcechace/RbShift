@@ -17,9 +17,9 @@ module RbShift
 
     attr_reader :token, :url
 
-    class InvalidAuthorizationError < StandardError;
+    class InvalidAuthorizationError < StandardError
     end
-    class InvalidCommandError < StandardError;
+    class InvalidCommandError < StandardError
     end
 
     def initialize(url, bearer_token: nil, username: nil, password: nil, verify_ssl: true)
@@ -64,14 +64,14 @@ module RbShift
     end
 
     def process_response(response)
-      response = response.keys.include?(:items) ? response[:items] : response
+      response = response.key?(:items) ? response[:items] : response
       log.debug(" -> Response #{response}") if ENV['RB_SHIFT_LOG_RESPONSES']
       response
     end
 
     def create_project(name, **opts)
       log.info "Creating project #{name}"
-      execute "new-project #{name}", **opts
+      execute 'new-project', name, **opts
       project = nil
       project = projects(true)[name] until project
       project
@@ -82,13 +82,12 @@ module RbShift
       @_projects
     end
 
-    def execute(command, **opts)
+    def execute(command, *args, **opts)
       log.debug("[EXEC] Executing command #{command} with opts: #{opts}")
-      oc_cmd = oc_command(command, **opts)
-      log.debug oc_cmd
+      oc_cmd = oc_command(command, *args, **opts)
       stdout, stderr, stat = Open3.capture3(oc_cmd)
       unless stderr.empty? && stat.success?
-        log.error oc_command(command, exclude_token: true, **opts)
+        log.error oc_command(command, *args, exclude_token: true, **opts)
         log.error "Command failed with status #{stat.exitstatus} -->"
         log.debug "Standard Output: #{stdout}"
         log.error "Error Output: #{stderr}"
@@ -117,14 +116,17 @@ module RbShift
       process_response JSON.parse(response, symbolize_names: true)
     end
 
-    def oc_command(command, exclude_token: false, **opts)
+    # rubocop:disable  Metrics/LineLength
+    def oc_command(command, *args, exclude_token: false, **opts)
       token = exclude_token ? '***' : @token
-      "oc --server=\"#{@url}\" --token=\"#{token}\" #{command} #{unfold_opts opts}"
+      "oc --server=\"#{@url}\" --token=\"#{token}\" #{command} #{unfold_opts opts} #{unfold_args args}"
     end
+    # rubocop:enable  Metrics/LineLength
 
     def client(resource)
       return @kubernetes if kube_entities.include?(resource)
       return @openshift if os_entities.include?(resource)
+
       raise "Resource '#{resource}' not supported!"
     end
 
@@ -176,6 +178,12 @@ module RbShift
         else
           "--#{k}=#{v.to_s.shellescape}"
         end
+      end.join(' ')
+    end
+
+    def unfold_args(args)
+      args.map do |k|
+        k.to_s.shellescape
       end.join(' ')
     end
   end

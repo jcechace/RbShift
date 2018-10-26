@@ -66,13 +66,13 @@ module RbShift
 
     def add_role_to_user(role, username)
       log.info "Adding role #{role} to user #{username} in project #{@name}"
-      execute "policy add-role-to-user #{role} #{username}"
+      execute 'policy add-role-to-user', role, username
       role_bindings true if @_role_bindings
     end
 
     def add_role_to_group(role, groupname)
       log.info "Adding role #{role} to user #{groupname} in project #{@name}"
-      execute "policy add-role-to-group #{role} #{groupname}"
+      execute 'policy add-role-to-group', role, groupname
       role_bindings true if @_role_bindings
     end
 
@@ -84,19 +84,19 @@ module RbShift
 
     def create_config_map(name, files: nil, literals: nil, **opts)
       log.info "Creating config map #{name} in project #{@name}"
-      execute "create configmap #{name}", 'from-file': files, 'from-literal': literals, **opts
+      execute 'create configmap', name, 'from-file': files, 'from-literal': literals, **opts
       config_maps true if @_config_maps
     end
 
     def create_service(name, kind, **opts)
       log.info "Creating service #{kind} #{name} in project #{@name}"
-      execute "create service #{kind} #{name}", **opts
+      execute 'create service', kind, name, **opts
       services true if @_services
     end
 
     def delete(block = false, timeout = 1)
       log.info "Deleting project #{@name}"
-      execute "delete project #{@name}"
+      execute 'delete project', @name
       @client.wait_project_deletion(@name, timeout) if block
     end
 
@@ -131,8 +131,8 @@ module RbShift
       invalidate
     end
 
-    def execute(command, **opts)
-      @client.execute command, namespace: @name, **opts
+    def execute(command, *args, **opts)
+      @client.execute command, *args, namespace: @name, **opts
     end
 
     def read_link(link)

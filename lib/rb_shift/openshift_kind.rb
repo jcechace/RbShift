@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 require 'json'
@@ -21,6 +20,7 @@ module RbShift
 
     def method_missing(symbol, *args)
       return obj.send(symbol, *args) if obj.respond_to? symbol
+
       super
     end
 
@@ -41,16 +41,16 @@ module RbShift
       end
 
       log.info "Updating #{self.class.class_name} #{@name}"
-      @parent.execute "patch #{self.class.class_name} #{@name} -p #{patch.shellescape}"
+      @parent.execute 'patch', self.class.class_name, @name, "-p #{patch}"
     end
 
-    def execute(command, **opts)
-      @parent.execute(command, **opts) if @parent.respond_to? :execute
+    def execute(command, *args, **opts)
+      @parent.execute(command, *args, **opts) if @parent.respond_to? :execute
     end
 
     def delete
       log.info "Deleting #{self.class.class_name} #{@name}"
-      @parent.execute "delete #{self.class.class_name} #{@name}"
+      @parent.execute 'delete', self.class.class_name, @name
       @parent.invalidate if @parent.respond_to? :invalidate
     end
 

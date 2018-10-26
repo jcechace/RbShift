@@ -10,11 +10,11 @@ module RbShift
   class DeploymentConfig < OpenshiftKind
     def scale(replicas, block: false, timeout: 60, polling: 5)
       log.info "Scaling deployment from deployment config #{name} to #{replicas} replicas"
-      @parent.execute "scale dc #{name}", replicas: replicas
+      @parent.execute 'scale dc', name, replicas: replicas
       wait_for_scale(replicas: replicas, timeout: timeout, polling: polling) if block
     end
 
-    def wait_for_scale(replicas: 0,timeout: 60, polling: 5)
+    def wait_for_scale(replicas: 0, timeout: 60, polling: 5)
       Timeout.timeout(timeout) do
         log.info("Waiting for scale of #{name} for #{timeout} seconds...")
         loop do
@@ -35,7 +35,7 @@ module RbShift
     # @param [Fixnum] polling State checking period
     def start_deployment(block: false, timeout: 60, polling: 5)
       log.info "Starting deployment from deployment config #{name}"
-      @parent.execute "rollout latest #{name}"
+      @parent.execute 'rollout latest', name
       sleep polling * 2
       deployments(true)
       wait_for_deployments(timeout: timeout, polling: polling) if block
@@ -90,16 +90,15 @@ module RbShift
     # Sets environment variables
     # Using nil as a value will unset that variable
     #
-    # @param [String, nil] container_name Name of the container where the environment is set
+    # @param [String, '*'] container_name Names of containers to be modified -> allows wildcards
     # @param [Bool] block If true blocks until redeployment is finished
     # @param [Fixnum] timeout Maximum time to wait
     # @param [Fixnum] polling State checking period
     # @param [Hash] env Environment variables
-    def set_env_variables(container_name = nil, block: false, timeout: 60, polling: 5, **env)
-      env_string       = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }.join(' ')
-      container_name ||= container[:name]
-      log.info "Setting env variables (#{env_string}) for #{name}/#{container_name}"
-      @parent.execute("set env dc/#{container_name} #{env_string}")
+    def set_env_variables(container_names = '*', block: false, timeout: 60, polling: 5, **env)
+      env_strings       = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }
+      log.info "Setting env variables (#{env_strings}) for #{name}/#{container_names}"
+      @parent.execute('set env', "dc/#{@name}", *env_strings, containers: container_names)
       sleep polling
       wait_for_deployments(timeout: timeout, polling: polling) if block
       reload(true)

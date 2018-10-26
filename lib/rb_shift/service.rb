@@ -14,12 +14,12 @@ module RbShift
     def create_route(name, hostname, termination = 'edge', **opts)
       log.info "Creating route #{name} #{hostname} for service #{@name}"
       if termination
-        @parent.execute "create route #{termination} #{name}",
+        @parent.execute 'create route', termination, name,
                         hostname: hostname,
                         service: @name,
                         **opts
       else
-        @parent.execute "expose service #{@name}", hostname: hostname, name: name, **opts
+        @parent.execute 'expose service', @name, hostname: hostname, name: name, **opts
       end
       routes true if @_routes
     end
