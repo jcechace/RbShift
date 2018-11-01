@@ -3,18 +3,21 @@
 require 'json'
 require_relative 'logging/logging_support'
 require 'shellwords'
+require 'forwardable'
+require_relative 'metadata'
 
 module RbShift
   # Abstract parent for all OpenShift resources (kinds)
   class OpenshiftKind
     include Logging::LoggingSupport
+    extend Forwardable
 
-    attr_reader :name, :namespace
+    attr_reader :metadata
+    def_delegators :metadata, :name, :namespace
 
     def initialize(parent, obj)
       @parent    = parent
-      @name      = obj[:metadata][:name]
-      @namespace = obj[:metadata][:namespace]
+      @metadata  = Metadata.new(obj[:metadata])
       @obj       = obj
     end
 

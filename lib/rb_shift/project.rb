@@ -164,6 +164,8 @@ module RbShift
     def initialize(name, client)
       @client = client
       @name   = name
+
+      super(nil, obj)
     end
   end
 end
