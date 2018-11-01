@@ -40,8 +40,8 @@ module RbShift
         patch = obj.to_json
       end
 
-      log.info "Updating #{self.class.class_name} #{@name}"
-      @parent.execute 'patch', self.class.class_name, @name, "-p #{patch}"
+      log.info "Updating #{self.class.class_name} #{name}"
+      @parent.execute 'patch', self.class.class_name, name, "-p #{patch}"
     end
 
     def execute(command, *args, **opts)
@@ -49,8 +49,8 @@ module RbShift
     end
 
     def delete
-      log.info "Deleting #{self.class.class_name} #{@name}"
-      @parent.execute 'delete', self.class.class_name, @name
+      log.info "Deleting #{self.class.class_name} #{name}"
+      @parent.execute 'delete', self.class.class_name, name
       @parent.invalidate if @parent.respond_to? :invalidate
     end
 

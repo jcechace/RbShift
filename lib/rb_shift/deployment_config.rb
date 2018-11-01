@@ -58,7 +58,7 @@ module RbShift
       if update || @_deployments.nil?
         items = @parent.client
                   .get('replicationcontrollers', namespace: @parent.name)
-                  .select { |item| item[:metadata][:annotations][dc_label] == @name }
+                  .select { |item| item[:metadata][:annotations][dc_label] == name }
 
         @_deployments = items.each_with_object({}) do |item, hash|
           resource            = ReplicationController.new(self, item)

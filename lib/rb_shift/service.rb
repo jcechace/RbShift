@@ -12,14 +12,14 @@ module RbShift
     end
 
     def create_route(name, hostname, termination = 'edge', **opts)
-      log.info "Creating route #{name} #{hostname} for service #{@name}"
+      log.info "Creating route #{name} #{hostname} for service #{self.name}"
       if termination
         @parent.execute 'create route', termination, name,
                         hostname: hostname,
-                        service: @name,
+                        service: self.name,
                         **opts
       else
-        @parent.execute 'expose service', @name, hostname: hostname, name: name, **opts
+        @parent.execute 'expose service', self.name, hostname: hostname, name: name, **opts
       end
       routes true if @_routes
     end
@@ -33,7 +33,7 @@ module RbShift
     def load_routes
       items = @parent.client
                 .get('routes', namespace: @parent.name)
-                .select { |item| item[:spec][:to][:name] == @name }
+                .select { |item| item[:spec][:to][:name] == name }
 
       items.each_with_object({}) do |item, hash|
         resource            = Route.new(self, item)
