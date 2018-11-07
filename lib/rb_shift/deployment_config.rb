@@ -58,7 +58,7 @@ module RbShift
       if update || @_deployments.nil?
         items = @parent.client
                   .get('replicationcontrollers', namespace: @parent.name)
-                  .select { |item| item[:metadata][:annotations][dc_label] == @name }
+                  .select { |item| item[:metadata][:annotations][dc_label] == name }
 
         @_deployments = items.each_with_object({}) do |item, hash|
           resource            = ReplicationController.new(self, item)
@@ -98,7 +98,7 @@ module RbShift
     def set_env_variables(container_names = '*', block: false, timeout: 60, polling: 5, **env)
       env_strings       = env.map { |k, v|  v ? "#{k}=#{v}" : "#{k}-" }
       log.info "Setting env variables (#{env_strings}) for #{name}/#{container_names}"
-      @parent.execute('set env', "dc/#{@name}", *env_strings, containers: container_names)
+      @parent.execute('set env', "dc/#{name}", *env_strings, containers: container_names)
       sleep polling
       wait_for_deployments(timeout: timeout, polling: polling) if block
       reload(true)
