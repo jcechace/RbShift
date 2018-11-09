@@ -38,7 +38,7 @@ module RbShift
 
     def update(patch = nil)
       if patch
-        parent.invalidate
+        @parent.invalidate
       else
         patch = obj.to_json
       end
