@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'rb_shift/testing'
+require_relative 'testing'
 
 describe 'When RbShift is using client' do
   before(:all) do
-    @project = create_project 'project'
+    @project  = create_project 'project'
     @project2 = create_project 'project2'
   end
 
