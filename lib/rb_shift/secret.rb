@@ -11,6 +11,8 @@ module RbShift
     # @param [String] name key in Secret
     # @return [String] value associated with name
     def [](name)
+      return nil unless @obj[:data][name.to_sym]
+
       Base64.decode64(@obj[:data][name.to_sym])
     end
 
