@@ -96,7 +96,7 @@ module RbShift
 
     def delete(block = false, timeout = 1)
       log.info "Deleting project #{name}"
-      @client.execute command, *args,  **opts
+      @client.execute 'delete project', name 
       @client.wait_project_deletion(name, timeout) if block
     end
 
